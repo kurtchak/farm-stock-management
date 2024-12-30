@@ -21,7 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-
     private final JwtTokenProvider tokenProvider;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtTokenProvider tokenProvider) {

@@ -15,3 +15,8 @@ app:
   jwt:
     secret: ${JWT_SECRET:default-dev-secret}
     expiration: 86400000
+
+logging:
+  level:
+    org.springframework.boot.autoconfigure.jdbc: DEBUG
+    org.hibernate: DEBUG
