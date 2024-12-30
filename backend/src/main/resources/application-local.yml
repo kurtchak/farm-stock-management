@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/farmstock
+    username: farmstock_user
+    password: farmstock_pass
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework: DEBUG
+    com.farmstock: DEBUG
