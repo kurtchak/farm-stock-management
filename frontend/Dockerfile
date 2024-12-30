@@ -1,15 +1,13 @@
-# Build stage
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+ARG VITE_API_URL
 RUN npm run build
 
-# Runtime stage - using simple http server
-FROM node:18-alpine
-WORKDIR /app
-RUN npm install -g http-server
-COPY --from=builder /app/dist .
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-CMD ["http-server", "--port", "80", "-P", "http://localhost:8080?"]
+CMD ["nginx", "-g", "daemon off;"]
