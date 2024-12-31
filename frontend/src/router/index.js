@@ -15,6 +15,11 @@ const routes = [
     path: '/adjust-quantity/:stockId',
     name: 'adjust-quantity',
     component: () => import('../views/AdjustQuantityView.vue')
+  },
+  {
+    path: '/create-item',
+    name: 'create-item',
+    component: () => import('../views/CreateItemView.vue')
   }
 ]
 
