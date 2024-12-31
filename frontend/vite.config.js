@@ -12,6 +12,10 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
-    }
+    },
+    watch: {
+      usePolling: true
+    },
+    hmr: true
   }
 })
