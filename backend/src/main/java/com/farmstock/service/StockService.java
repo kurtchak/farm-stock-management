@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class StockService {
     private final StockRepository stockRepository;
     private final CropRepository cropRepository;
