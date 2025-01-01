@@ -26,15 +26,15 @@ CREATE TABLE crops (
 CREATE TABLE stocks (
     id BIGSERIAL PRIMARY KEY,
     crop_id BIGINT NOT NULL REFERENCES crops(id),
-    batch_code VARCHAR(50) NOT NULL UNIQUE,
-    quantity DOUBLE PRECISION NOT NULL,
-    unit_of_measure VARCHAR(20) NOT NULL,
+    batch_code VARCHAR(20) NOT NULL UNIQUE,
+    quantity DECIMAL(10,2) NOT NULL,
+    unit_of_measure VARCHAR(10) NOT NULL,
     storage_location VARCHAR(100),
-    harvest_date TIMESTAMP,
+    harvest_date TIMESTAMP NOT NULL,
     quality_grade VARCHAR(10),
     notes TEXT,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Stock movements table
@@ -43,7 +43,7 @@ CREATE TABLE stock_movements (
     stock_id BIGINT NOT NULL REFERENCES stocks(id),
     user_id BIGINT NOT NULL REFERENCES users(id),
     movement_type VARCHAR(20) NOT NULL,
-    quantity DOUBLE PRECISION NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
     reason TEXT,
     created_at TIMESTAMP NOT NULL
 );

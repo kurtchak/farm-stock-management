@@ -209,6 +209,8 @@ const router = useRouter()
 const crops = ref([])
 const selectedCropId = ref('')
 const isAddingNewCrop = ref(false)
+const createdStock = ref(null)
+const showQRModal = ref(false)
 
 // Initialize form with all required fields
 const form = ref({
@@ -269,8 +271,8 @@ const submitForm = async () => {
 
     if (!response.ok) throw new Error('Failed to create stock')
     const createdStock = await response.json()
-    // Handle success (show QR code etc.)
-
+    showQRModal.value = true
+    createdStock.value = response.data // Contains batchCode
   } catch (error) {
     console.error('Failed to create stock:', error)
   }

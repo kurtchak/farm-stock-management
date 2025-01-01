@@ -4,84 +4,53 @@ import com.farmstock.exception.ResourceNotFoundException;
 import com.farmstock.model.CreateStockRequest;
 import com.farmstock.model.Crop;
 import com.farmstock.model.Stock;
+import com.farmstock.model.StockAdjustmentRequest;
 import com.farmstock.model.StockMovement;
-import com.farmstock.model.User;
 import com.farmstock.repository.CropRepository;
-import com.farmstock.repository.StockMovementRepository;
 import com.farmstock.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class StockService {
     private final StockRepository stockRepository;
     private final CropRepository cropRepository;
-    private final StockMovementRepository movementRepository;
-    private final UserService userService;
 
     @Autowired
-    public StockService(StockRepository stockRepository, CropRepository cropRepository,
-                        StockMovementRepository movementRepository,
-                        UserService userService) {
+    public StockService(StockRepository stockRepository, CropRepository cropRepository) {
         this.stockRepository = stockRepository;
         this.cropRepository = cropRepository;
-        this.movementRepository = movementRepository;
-        this.userService = userService;
     }
 
-    public Stock createStock(Stock stock) {
-        stock.setBatchCode(generateBatchCode(stock.getCrop()));
-        return stockRepository.save(stock);
-    }
-
-    public void adjustStock(Long stockId, Double quantity, String movementType, String reason, Long userId) {
-        Stock stock = stockRepository.findById(stockId)
+    public Stock adjustStock(Long id, StockAdjustmentRequest request) {
+        Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
-        User user = userService.getUserById(userId);
 
-        // Create movement record
-        StockMovement movement = new StockMovement();
-        movement.setStock(stock);
-        movement.setUser(user);
-        movement.setQuantity(quantity);
-        movement.setMovementType(movementType);
-        movement.setReason(reason);
-
-        // Update stock quantity
-        if ("IN".equals(movementType)) {
-            stock.setQuantity(stock.getQuantity() + quantity);
-        } else if ("OUT".equals(movementType)) {
-            if (stock.getQuantity() < quantity) {
-                throw new IllegalArgumentException("Insufficient stock");
-            }
-            stock.setQuantity(stock.getQuantity() - quantity);
+        // Add validation for sufficient quantity
+        if (stock.getQuantity().add(request.getQuantity()).compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Insufficient stock quantity");
         }
 
-        stockRepository.save(stock);
-        movementRepository.save(movement);
-    }
+        // Update quantity
+        stock.setQuantity(stock.getQuantity().add(request.getQuantity()));
 
-    private String generateBatchCode(Crop crop) {
-        LocalDateTime now = LocalDateTime.now();
-        return String.format("%s-%d-%03d",
-                crop.getName().substring(0, Math.min(3, crop.getName().length())).toUpperCase(),
-                now.getYear(),
-                stockRepository.findByCropId(crop.getId()).size() + 1
-        );
-    }
+        StockMovement movement = new StockMovement();
+        movement.setStock(stock);
+        movement.setQuantity(request.getQuantity());
+        movement.setMovementType(request.getMovementType());
+        movement.setReason(request.getReason());
 
-    public List<Stock> getLowStockItems(Double threshold) {
-        return stockRepository.findByQuantityLessThan(threshold);
+        return stockRepository.save(stock);
     }
-
 
     public Stock createStock(CreateStockRequest request) {
         // Verify crop exists
@@ -91,7 +60,7 @@ public class StockService {
         // Create new stock
         Stock stock = new Stock();
         stock.setCrop(crop);
-        stock.setQuantity(request.getQuantity());
+        stock.setQuantity(BigDecimal.valueOf(request.getQuantity()));
         stock.setUnitOfMeasure(request.getUnitOfMeasure());
         stock.setHarvestDate(request.getHarvestDate());
         stock.setQualityGrade("A"); // Default grade
@@ -112,5 +81,13 @@ public class StockService {
         return stockRepository.findMaxSequenceForPattern(pattern)
                 .map(seq -> seq + 1)
                 .orElse(1);
+    }
+
+    public Optional<Stock> findByBatchCode(String batchCode) {
+        return stockRepository.findByBatchCode(batchCode);
+    }
+
+    public List<Stock> getAllStocks() {
+        return stockRepository.findAll();
     }
 }

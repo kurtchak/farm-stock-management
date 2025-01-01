@@ -58,7 +58,7 @@ const navigateToAdjust = () => {
   router.push('/adjust')
 }
 const navigateToBrowser = () => {
-  router.push('/browser')
+  router.push('/stocks')
 }
 const navigateToCreate = () => {
   router.push('/create-item')

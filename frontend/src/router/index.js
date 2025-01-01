@@ -7,6 +7,11 @@ const routes = [
     component: () => import('../views/MainView.vue')
   },
   {
+    path: '/test-qr',
+    name: 'test-qr',
+    component: () => import('../views/TestQRView.vue')
+  },
+  {
     path: '/scan',
     name: 'scan',
     component: () => import('../views/ScanView.vue')
@@ -20,6 +25,11 @@ const routes = [
     path: '/create-item',
     name: 'create-item',
     component: () => import('../views/CreateItemView.vue')
+  },
+  {
+    path: '/stocks',
+    name: 'stocks',
+    component: () => import('../views/StockListView.vue')
   }
 ]
 

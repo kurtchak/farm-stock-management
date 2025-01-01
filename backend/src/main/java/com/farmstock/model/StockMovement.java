@@ -2,6 +2,8 @@ package com.farmstock.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,7 +26,7 @@ public class StockMovement {
     private String movementType;  // IN, OUT, ADJUSTMENT
 
     @Column(nullable = false)
-    private Double quantity;
+    private BigDecimal quantity;
 
     private String reason;
 

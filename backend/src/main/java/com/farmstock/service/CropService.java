@@ -4,7 +4,6 @@ import com.farmstock.exception.BadRequestException;
 import com.farmstock.model.CreateCropRequest;
 import com.farmstock.model.Crop;
 import com.farmstock.repository.CropRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

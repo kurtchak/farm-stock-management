@@ -18,6 +18,7 @@
     "qrcode.vue": "^3.6.0",
     "serve": "^14.2.4",
     "vue": "^3.3.0",
+    "vue-barcode-reader": "^1.0.3",
     "vue-qrcode-reader": "^5.7.0",
     "vue-router": "^4.2.0"
   },
