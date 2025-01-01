@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,6 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     @Query(value = "SELECT COALESCE(MAX(CAST(SUBSTRING(batch_code, -3) AS INTEGER)), 0) " +
             " FROM stocks WHERE batch_code LIKE :pattern", nativeQuery = true)
     Optional<Integer> findMaxSequenceForPattern(@Param("pattern") String pattern);
+    @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop")
+    List<Stock> findAllWithCrop();
 }
