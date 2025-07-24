@@ -26,6 +26,16 @@ public class StockController {
         this.stockService = stockService;
     }
 
+    @GetMapping("/db-test")
+    public String dbTest() {
+        try {
+            long count = stockService.getAllStocks().size();
+            return "DB connection OK, stocks count: " + count;
+        } catch (Exception e) {
+            return "DB error: " + e.getMessage();
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<Stock>> getAllStocks() {
         return ResponseEntity.ok(stockService.getAllStocks());
