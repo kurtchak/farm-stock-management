@@ -17,4 +17,5 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Integer> findMaxSequenceForPattern(@Param("pattern") String pattern);
     @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop")
     List<Stock> findAllWithCrop();
+    List<Stock> findAll();
 }
