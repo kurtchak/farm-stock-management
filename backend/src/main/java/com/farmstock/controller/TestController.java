@@ -13,4 +13,11 @@ public class TestController {
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("API is working");
     }
+
+    @GetMapping("/debug")
+    public String debug() {
+        String dbUrl = System.getenv("DATABASE_URL");
+        return "DATABASE_URL exists: " + (dbUrl != null) +
+                ", Length: " + (dbUrl != null ? dbUrl.length() : "null");
+    }
 }
