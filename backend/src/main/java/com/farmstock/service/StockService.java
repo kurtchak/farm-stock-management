@@ -88,6 +88,7 @@ public class StockService {
     }
 
     public List<Stock> getAllStocks() {
-        return stockRepository.findAllWithCrop();
+        return stockRepository.findAll();
+//        return stockRepository.findAllWithCrop();
     }
 }
