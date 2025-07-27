@@ -19,3 +19,8 @@ server:
   port: ${PORT:8080}
   tomcat:
     connection-timeout: 30000
+
+logging:
+  level:
+    org.springframework.boot.autoconfigure.jdbc: INFO
+    org.hibernate: INFO
