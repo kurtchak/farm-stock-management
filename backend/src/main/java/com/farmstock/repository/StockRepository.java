@@ -12,10 +12,13 @@ import java.util.Optional;
 @Repository
 public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findByBatchCode(String batchCode);
+
     @Query(value = "SELECT COALESCE(MAX(CAST(SUBSTRING(batch_code, -3) AS INTEGER)), 0) " +
             " FROM stocks WHERE batch_code LIKE :pattern", nativeQuery = true)
     Optional<Integer> findMaxSequenceForPattern(@Param("pattern") String pattern);
+
     @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop")
     List<Stock> findAllWithCrop();
+
     List<Stock> findAll();
 }
