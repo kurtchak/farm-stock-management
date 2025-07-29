@@ -10,17 +10,25 @@ spring:
     locations: classpath:db/migration
   datasource:
     hikari:
-      connection-timeout: 20000 # 20s
-      maximum-pool-size: 5
+      connection-timeout: 60000 # 60s
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000 # 5 minutes
+      max-lifetime: 1200000 # 20 minutes
   mvc:
     async:
-      request-timeout: 30000 # 30s
+      request-timeout: 60000 # 60s
 server:
   port: ${PORT:8080}
   tomcat:
-    connection-timeout: 30000
+    connection-timeout: 60000 # 60s
+    threads:
+      max: 200
+      min-spare: 10
 
 logging:
   level:
-    org.springframework.boot.autoconfigure.jdbc: INFO
-    org.hibernate: INFO
+    org.springframework.boot.autoconfigure.jdbc: DEBUG
+    org.hibernate: DEBUG
+    com.farmstock: DEBUG
+    org.springframework.web: DEBUG
