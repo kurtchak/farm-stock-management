@@ -2,8 +2,8 @@ package com.farmstock.service;
 
 import com.farmstock.model.Order;
 import com.farmstock.model.SmsLog;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,14 +17,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class AdminNotificationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     
     // Optional - môže byť null ak nie je nakonfigurovaný
-    private final JavaMailSender mailSender;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
 
     @Value("${admin.notification.enabled:false}")
     private boolean enabled;
