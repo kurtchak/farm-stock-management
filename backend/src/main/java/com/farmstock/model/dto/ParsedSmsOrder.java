@@ -1,4 +1,4 @@
-package com.farmstock.model;
+package com.farmstock.model.dto;
 
 import lombok.Data;
 import lombok.Builder;

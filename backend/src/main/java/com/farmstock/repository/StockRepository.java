@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +22,12 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     List<Stock> findAllWithCrop();
 
     List<Stock> findAll();
+
+    List<Stock> findByCropId(Long cropId);
+
+    @Query("SELECT COALESCE(SUM(s.quantity), 0) FROM Stock s WHERE s.crop.id = :cropId")
+    BigDecimal getTotalQuantityByCropId(@Param("cropId") Long cropId);
+
+    @Query("SELECT s FROM Stock s WHERE s.crop.id = :cropId AND s.quantity > 0 ORDER BY s.harvestDate ASC")
+    List<Stock> findAvailableStockByCropIdOrderByHarvestDate(@Param("cropId") Long cropId);
 }
