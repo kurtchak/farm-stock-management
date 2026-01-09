@@ -8,8 +8,14 @@ BACKEND_URL=${BACKEND_URL:-http://backend:8080}
 # Export for envsubst
 export BACKEND_URL
 
+# Log the backend URL for debugging (without sensitive info)
+echo "Using BACKEND_URL: ${BACKEND_URL}"
+
 # Substitute environment variables in nginx config
 envsubst '$BACKEND_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
+
+# Validate nginx config before starting
+nginx -t
 
 # Start nginx
 exec nginx -g 'daemon off;'
