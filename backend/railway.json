@@ -1,0 +1,13 @@
+{
+    "build": {
+        "builder": "nixpacks",
+        "buildCommand": "mvn clean package -DskipTests",
+        "startCommand": "java -jar -Dspring.profiles.active=prod target/*.jar"
+    },
+    "deploy": {
+        "startCommand": "java -jar -Dspring.profiles.active=prod app.jar",
+        "restartPolicyType": "on_failure",
+        "restartPolicyMaxRetries": 10
+    }
+}
+

@@ -6,34 +6,80 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import javax.sql.DataSource;
+import java.net.URI;
 
 @Configuration
 public class DatabaseConfig {
     
-    @Value("${PGHOST}")
+    @Value("${PGHOST:}")
     private String host;
     
-    @Value("${PGPORT}")
+    @Value("${PGPORT:}")
     private String port;
     
-    @Value("${PGDATABASE}")
+    @Value("${PGDATABASE:}")
     private String database;
     
-    @Value("${PGUSER}")
+    @Value("${PGUSER:}")
     private String username;
     
-    @Value("${PGPASSWORD}")
+    @Value("${PGPASSWORD:}")
     private String password;
 
     @Bean
     @Primary
     public DataSource dataSource() {
-        String url = String.format("jdbc:postgresql://%s:%s/%s", host, port, database);
-        return DataSourceBuilder.create()
-                .url(url)
-                .username(username)
-                .password(password)
-                .driverClassName("org.postgresql.Driver")
-                .build();
+        String dbUrl = System.getenv("DATABASE_URL");
+        
+        if (dbUrl != null && !dbUrl.isEmpty()) {
+            // Parse DATABASE_URL from Railway format: postgresql://user:password@host:port/database
+            try {
+                URI uri = new URI(dbUrl);
+                String parsedUsername = "";
+                String parsedPassword = "";
+                
+                // Parse user:password from userInfo
+                if (uri.getUserInfo() != null && !uri.getUserInfo().isEmpty()) {
+                    String userInfo = uri.getUserInfo();
+                    int colonIndex = userInfo.indexOf(':');
+                    if (colonIndex >= 0) {
+                        parsedUsername = userInfo.substring(0, colonIndex);
+                        parsedPassword = userInfo.substring(colonIndex + 1);
+                    } else {
+                        parsedUsername = userInfo;
+                    }
+                }
+                
+                String parsedHost = uri.getHost();
+                int parsedPort = uri.getPort() != -1 ? uri.getPort() : 5432;
+                String parsedDatabase = uri.getPath().startsWith("/") ? uri.getPath().substring(1) : uri.getPath();
+                
+                String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", parsedHost, parsedPort, parsedDatabase);
+                
+                return DataSourceBuilder.create()
+                        .url(jdbcUrl)
+                        .username(parsedUsername)
+                        .password(parsedPassword)
+                        .driverClassName("org.postgresql.Driver")
+                        .build();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse DATABASE_URL: " + dbUrl, e);
+            }
+        } else {
+            // Fall back to individual environment variables
+            if (host == null || host.isEmpty() || 
+                port == null || port.isEmpty() || 
+                database == null || database.isEmpty()) {
+                throw new RuntimeException("Either DATABASE_URL or PGHOST/PGPORT/PGDATABASE must be set");
+            }
+            
+            String url = String.format("jdbc:postgresql://%s:%s/%s", host, port, database);
+            return DataSourceBuilder.create()
+                    .url(url)
+                    .username(username)
+                    .password(password)
+                    .driverClassName("org.postgresql.Driver")
+                    .build();
+        }
     }
 }
