@@ -1,11 +1,11 @@
 package com.farmstock.service.sms;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(name = "sms.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnExpression("${sms.enabled:false} == false or '${sms.provider:}' == ''")
 @Slf4j
 public class NoOpSmsGateway implements SmsGateway {
 
