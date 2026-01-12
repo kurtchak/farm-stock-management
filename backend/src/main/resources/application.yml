@@ -18,33 +18,6 @@ logging:
     org.springframework.boot.autoconfigure.jdbc: DEBUG
     org.hibernate: DEBUG
 
-# SMS Gateway konfigurácia
-sms:
-  enabled: false
-  # Typ providera: android-gateway, twilio, bulkgate
-#  provider: android-gateway
-  # Pre Android Gateway - URL kam posielať SMS
-#  android-gateway:
-#    url: ${SMS_GATEWAY_URL:http://192.168.1.187:8080/send}
-#    username: sms
-#    password: 1Eqyv9QU
-
-  provider: messagebird  # twilio | messagebird | vonage
-
-  twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID:}
-    auth-token: ${TWILIO_AUTH_TOKEN:}
-    from-number: ${TWILIO_FROM_NUMBER:}
-
-  messagebird:
-    access-key: ${MESSAGEBIRD_ACCESS_KEY:}
-    originator: ${MESSAGEBIRD_ORIGINATOR:}  # SK číslo
-
-  vonage:
-    api-key: ${VONAGE_API_KEY:}
-    api-secret: ${VONAGE_API_SECRET:}
-    from-number: ${VONAGE_FROM_NUMBER:}
-
 admin:
   notification:
     enabled: true

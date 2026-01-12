@@ -1,7 +1,6 @@
 package com.farmstock.service;
 
 import com.farmstock.model.Order;
-import com.farmstock.model.SmsLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,23 +38,6 @@ public class AdminNotificationService {
     private String telegramChatId;
 
     /**
-     * Notifikácia o novej SMS
-     */
-    @Async
-    public void notifyNewSms(SmsLog smsLog) {
-        if (!enabled) return;
-
-        String message = String.format(
-                "📩 Nová SMS\nOd: %s\nText: %s\nČas: %s",
-                smsLog.getSenderPhone(),
-                smsLog.getMessageText(),
-                smsLog.getReceivedAt()
-        );
-
-        sendNotifications("Nová SMS", message);
-    }
-
-    /**
      * Notifikácia o novej objednávke
      */
     @Async
@@ -63,11 +45,10 @@ public class AdminNotificationService {
         if (!enabled) return;
 
         String message = String.format(
-                "📦 Nová objednávka %s\nOd: %s\nStatus: %s\nText: %s",
+                "📦 Nová objednávka %s\nOd: %s\nStatus: %s",
                 order.getOrderNumber(),
-                order.getSenderPhone(),
-                order.getStatus(),
-                order.getRawSmsText()
+                order.getSenderPhone() != null ? order.getSenderPhone() : "N/A",
+                order.getStatus()
         );
 
         sendNotifications("Nová objednávka", message);
@@ -81,10 +62,9 @@ public class AdminNotificationService {
         if (!enabled) return;
 
         String message = String.format(
-                "⚠️ Nedostatok na sklade!\nObjednávka: %s\nOd: %s\nText: %s",
+                "⚠️ Nedostatok na sklade!\nObjednávka: %s\nOd: %s",
                 order.getOrderNumber(),
-                order.getSenderPhone(),
-                order.getRawSmsText()
+                order.getSenderPhone() != null ? order.getSenderPhone() : "N/A"
         );
 
         sendNotifications("Nedostatok na sklade", message);
