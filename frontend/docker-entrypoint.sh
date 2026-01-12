@@ -3,16 +3,12 @@ set -e
 
 # Default backend URL if not set (for Railway internal networking)
 # Railway services can communicate using service names or public URLs
-# Try to detect Railway service URL if available
+# IMPORTANT: Use public URL of backend service for better reliability
 if [ -z "$BACKEND_URL" ]; then
-    # Check if RAILWAY_SERVICE_URL is available (Railway provides this)
-    if [ -n "$RAILWAY_SERVICE_URL" ]; then
-        # This is the current service URL, we need backend service URL
-        # Try common Railway service names
-        BACKEND_URL="http://backend:8080"
-    else
-        BACKEND_URL="http://backend:8080"
-    fi
+    echo "WARNING: BACKEND_URL not set! Using default http://backend:8080"
+    echo "Please set BACKEND_URL environment variable to your backend service URL"
+    echo "Example: https://your-backend-service.railway.app"
+    BACKEND_URL="http://backend:8080"
 fi
 
 # Export for envsubst
@@ -27,16 +23,21 @@ echo "========================================="
 # Substitute environment variables in nginx config
 envsubst '$BACKEND_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 
-# Show the generated config for debugging
-echo "Generated nginx config:"
-cat /etc/nginx/conf.d/default.conf
+# Show the generated config for debugging (first few lines)
+echo "Generated nginx config (first 20 lines):"
+head -n 20 /etc/nginx/conf.d/default.conf
 echo "========================================="
 
 # Validate nginx config before starting
 if ! nginx -t; then
     echo "ERROR: nginx config validation failed!"
+    echo "Full config:"
+    cat /etc/nginx/conf.d/default.conf
     exit 1
 fi
+
+# Create log directory if it doesn't exist
+mkdir -p /var/log/nginx
 
 # Start nginx
 echo "Starting nginx..."
