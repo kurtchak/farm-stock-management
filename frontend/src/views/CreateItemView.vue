@@ -75,7 +75,7 @@
               Popis
             </label>
             <textarea
-                v-model="form.description"
+                v-model="form.notes"
                 rows="3"
                 class="w-full p-2 border rounded-md"
             ></textarea>
@@ -251,8 +251,8 @@ onMounted(async () => {
 const submitForm = async () => {
   try {
     const stockData = {
-      name: form.value.name,
-      variety: form.value.variety,
+      name: newCrop.value.name,
+      variety: newCrop.value.variety,
       quantity: form.value.quantity,
       unitOfMeasure: form.value.unitOfMeasure,
       harvestDate: new Date(
