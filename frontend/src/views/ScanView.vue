@@ -22,18 +22,25 @@
           <div class="mb-4 text-green-500">
             <CheckCircle class="w-12 h-12 mx-auto" />
           </div>
-          <h2 class="text-xl font-bold mb-2">Položka nájdená</h2>
-          <p class="text-gray-600 mb-4">{{ foundStock.crop.name }}</p>
+          <h2 class="text-xl font-bold mb-2">{{ foundStock.crop.name }}</h2>
+          <p class="text-gray-600 mb-1">Kód: {{ foundStock.batchCode }}</p>
+          <p class="text-gray-600 mb-4">Skladom: {{ foundStock.quantity }} {{ foundStock.unitOfMeasure }}</p>
+
           <div class="flex gap-2">
-            <button @click="proceedToAdjust"
-                    class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">
-              Pokračovať
+            <button @click="proceedToAdjust('in')"
+                    class="flex-1 bg-teal-500 text-white py-3 rounded-lg hover:bg-teal-600 font-semibold">
+              + Príjem
             </button>
-            <button @click="closeModal"
-                    class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
-              Zrušiť
+            <button @click="proceedToAdjust('out')"
+                    class="flex-1 bg-rose-500 text-white py-3 rounded-lg hover:bg-rose-600 font-semibold">
+              − Výdaj
             </button>
           </div>
+
+          <button @click="closeModal"
+                  class="w-full mt-2 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
+            Zrušiť
+          </button>
         </div>
 
         <!-- Error Case -->
@@ -96,11 +103,12 @@ const onDetect = async (detectedCodes) => {
   }
 }
 
-const proceedToAdjust = () => {
+const proceedToAdjust = (type) => {
   if (foundStock.value) {
     router.push({
       name: 'adjust-quantity',
-      params: { stockId: foundStock.value.batchCode }
+      params: { stockId: foundStock.value.batchCode },
+      query: { type }  // 'in' alebo 'out'
     })
   }
 }
