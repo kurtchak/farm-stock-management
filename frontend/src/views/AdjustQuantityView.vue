@@ -93,7 +93,7 @@ const isValidQuantity = computed(() => {
 onMounted(async () => {
   try {
     const batchCode = route.params.stockId
-    const response = await fetch(`/api/stock/batch/${batchCode}`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${batchCode}`)
     if (!response.ok) throw new Error('Položka nebola nájdená')
     stock.value = await response.json()
   } catch (e) {
@@ -108,7 +108,7 @@ const submitAdjustment = async () => {
 
   try {
     loading.value = true
-    const response = await fetch(`/api/stock/${stock.value.id}/adjust`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/${stock.value.id}/adjust`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

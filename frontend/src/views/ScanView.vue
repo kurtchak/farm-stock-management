@@ -73,11 +73,12 @@ const onInit = async (promise) => {
 }
 
 const onDecode = async (result) => {
+  console.log('QR Result:', result, typeof result)
   if (isProcessing.value) return // Prevent multiple scans
   isProcessing.value = true
 
   try {
-    const response = await fetch(`/api/stock/batch/${result.text}`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${result.text}`)
 
     // Wait 3 seconds before showing result
     await new Promise(resolve => setTimeout(resolve, 3000))

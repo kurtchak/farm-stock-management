@@ -240,7 +240,7 @@ watch(selectedCropId, (newValue) => {
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/crops')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/crops`)
     crops.value = await response.json()
   } catch (error) {
     console.error('Failed to fetch crops:', error)
@@ -261,7 +261,7 @@ const submitForm = async () => {
       notes: form.value.notes
     }
 
-    const response = await fetch('/api/stock', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -280,7 +280,7 @@ const submitForm = async () => {
 
 const saveNewCrop = async () => {
   try {
-    const response = await fetch('/api/crops', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/crops`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
