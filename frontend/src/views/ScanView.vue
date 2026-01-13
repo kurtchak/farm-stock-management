@@ -73,15 +73,24 @@ const onInit = async (promise) => {
 }
 
 const onDecode = async (result) => {
-  console.log('QR Result:', result, typeof result)
-  if (isProcessing.value) return // Prevent multiple scans
+  if (isProcessing.value) return
   isProcessing.value = true
 
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${result.text}`)
+  // Zisti hodnotu QR kódu (kompatibilné s oboma verziami)
+  const qrValue = typeof result === 'string'
+      ? result
+      : (result?.text || result?.rawValue || result?.[0]?.rawValue)
 
-    // Wait 3 seconds before showing result
-    await new Promise(resolve => setTimeout(resolve, 3000))
+  console.log('QR scanned:', qrValue)
+
+  if (!qrValue) {
+    console.error('Could not extract QR value from:', result)
+    isProcessing.value = false
+    return
+  }
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${qrValue}`)
 
     if (response.ok) {
       foundStock.value = await response.json()
@@ -90,6 +99,7 @@ const onDecode = async (result) => {
     }
     showModal.value = true
   } catch (error) {
+    console.error('API error:', error)
     foundStock.value = null
     showModal.value = true
   } finally {
