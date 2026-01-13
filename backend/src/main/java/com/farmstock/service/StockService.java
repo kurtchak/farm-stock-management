@@ -31,6 +31,7 @@ public class StockService {
         this.cropRepository = cropRepository;
     }
 
+    @Transactional
     public Stock adjustStock(Long id, StockAdjustmentRequest request) {
         Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found"));
