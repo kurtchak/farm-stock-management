@@ -54,24 +54,23 @@ public class StockService {
     }
 
     public Stock createStock(CreateStockRequest request) {
-        // Verify crop exists
-        Crop crop = cropRepository.findById(request.getCropId())
-                .orElseThrow(() -> new ResourceNotFoundException("Crop not found"));
+        Crop crop = new Crop();
+        crop.setName(request.getCropName());
+        crop.setVariety(request.getVariety());
+        crop.setHarvestSeason(request.getHarvestSeason());
+        crop.setDescription(request.getDescription());
+        crop.setStorageConditions(request.getStorageConditions());
+        cropRepository.save(crop);
 
-        // Create new stock
         Stock stock = new Stock();
         stock.setCrop(crop);
-        stock.setQuantity(BigDecimal.valueOf(request.getQuantity()));
+        stock.setBatchCode(request.getBatchCode());
+        stock.setQuantity(request.getQuantity());
         stock.setUnitOfMeasure(request.getUnitOfMeasure());
+        stock.setStorageLocation(request.getStorageLocation());
         stock.setHarvestDate(request.getHarvestDate());
-        stock.setQualityGrade("A"); // Default grade
-
-        // Generate batch code: [CROP_NAME_3_CHARS]-YYMM-[SEQUENTIAL]
-        String prefix = crop.getName().substring(0, Math.min(3, crop.getName().length())).toUpperCase();
-        String datePart = new SimpleDateFormat("yyMM").format(Date.from(request.getHarvestDate().atZone(ZoneId.systemDefault()).toInstant()));
-        String sequence = String.format("%03d", getNextSequenceNumber(prefix, datePart));
-
-        stock.setBatchCode(String.format("%s-%s-%s", prefix, datePart, sequence));
+        stock.setQualityGrade(request.getQualityGrade());
+        stock.setNotes(request.getNotes());
 
         // Save and return
         return stockRepository.save(stock);

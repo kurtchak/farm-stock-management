@@ -1,6 +1,5 @@
 package com.farmstock.controller;
 
-import com.farmstock.model.Customer;
 import com.farmstock.model.Order;
 import com.farmstock.model.OrderStatus;
 import com.farmstock.service.OrderService;
