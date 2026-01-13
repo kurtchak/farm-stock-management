@@ -214,7 +214,8 @@ const showQRModal = ref(false)
 
 // Initialize form with all required fields
 const form = ref({
-  cropId: '',
+  name: '',
+  variety: '',
   quantity: '',
   unitOfMeasure: 'kg',
   harvestDay: new Date().getDate(),
@@ -250,7 +251,8 @@ onMounted(async () => {
 const submitForm = async () => {
   try {
     const stockData = {
-      cropId: form.value.cropId,
+      name: form.value.name,
+      variety: form.value.variety,
       quantity: form.value.quantity,
       unitOfMeasure: form.value.unitOfMeasure,
       harvestDate: new Date(
