@@ -25,7 +25,7 @@ const stocks = ref([])
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/stock')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock`)
     stocks.value = await response.json()
   } catch (error) {
     console.error('Failed to load stocks:', error)
