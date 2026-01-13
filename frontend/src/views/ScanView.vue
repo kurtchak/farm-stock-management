@@ -9,7 +9,7 @@
 
     <div class="flex-grow flex flex-col items-center justify-center p-4">
       <div class="w-full max-w-lg aspect-square bg-gray-100 rounded-lg overflow-hidden">
-        <QrcodeStream @decode="onDecode" @init="onInit" />
+        <QrcodeStream @detect="onDetect" @error="onError" />
       </div>
     </div>
 
@@ -64,30 +64,19 @@ const showModal = ref(false)
 const foundStock = ref(null)
 const isProcessing = ref(false)
 
-const onInit = async (promise) => {
-  try {
-    await promise
-  } catch (error) {
-    console.error('Failed to initialize camera:', error)
-  }
+const onError = (error) => {
+  console.error('Camera error:', error)
 }
 
-const onDecode = async (result) => {
+const onDetect = async (detectedCodes) => {
+  console.log('Detected:', detectedCodes)
+
+  if (!detectedCodes || detectedCodes.length === 0) return
   if (isProcessing.value) return
   isProcessing.value = true
 
-  // Zisti hodnotu QR kódu (kompatibilné s oboma verziami)
-  const qrValue = typeof result === 'string'
-      ? result
-      : (result?.text || result?.rawValue || result?.[0]?.rawValue)
-
-  console.log('QR scanned:', qrValue)
-
-  if (!qrValue) {
-    console.error('Could not extract QR value from:', result)
-    isProcessing.value = false
-    return
-  }
+  const qrValue = detectedCodes[0].rawValue
+  console.log('QR value:', qrValue)
 
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${qrValue}`)
