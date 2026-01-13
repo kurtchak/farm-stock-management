@@ -3,6 +3,8 @@ package com.farmstock.controller;
 import com.farmstock.model.CreateCropRequest;
 import com.farmstock.model.Crop;
 import com.farmstock.service.CropService;
+
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,7 @@ public class CropController {
     }
     
     @PostMapping
+    @Transactional
     public ResponseEntity<Crop> createCrop(@RequestBody @Valid CreateCropRequest request) {
         Crop crop = cropService.createCrop(request);
         return ResponseEntity.ok(crop);
