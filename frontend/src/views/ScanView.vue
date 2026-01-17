@@ -8,51 +8,65 @@
     </div>
 
     <div class="flex-grow flex flex-col items-center justify-center p-4">
-      <div class="w-full max-w-lg aspect-square bg-gray-100 rounded-lg overflow-hidden">
+      <div class="w-full max-w-lg aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
         <QrcodeStream @detect="onDetect" @error="onError" />
       </div>
+
+      <!-- Manual Selection Fallback -->
+      <button
+        @click="showManualSelect = true"
+        class="bg-white text-gray-700 px-6 py-3 rounded-lg shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors font-medium"
+      >
+        Manuálny výber úrody
+      </button>
     </div>
 
-    <!-- Feedback Modal -->
+    <!-- Error Modal - Only shown when stock not found -->
     <div v-if="showModal"
          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-        <!-- Success Case -->
-        <div v-if="foundStock" class="text-center">
-          <div class="mb-4 text-green-500">
-            <CheckCircle class="w-12 h-12 mx-auto" />
-          </div>
-          <h2 class="text-xl font-bold mb-2">{{ foundStock.crop.name }}</h2>
-          <p class="text-gray-600 mb-1">Kód: {{ foundStock.batchCode }}</p>
-          <p class="text-gray-600 mb-4">Skladom: {{ foundStock.quantity }} {{ foundStock.unitOfMeasure }}</p>
-
-          <div class="flex gap-2">
-            <button @click="proceedToAdjust('in')"
-                    class="flex-1 bg-teal-500 text-white py-3 rounded-lg hover:bg-teal-600 font-semibold">
-              + Príjem
-            </button>
-            <button @click="proceedToAdjust('out')"
-                    class="flex-1 bg-rose-500 text-white py-3 rounded-lg hover:bg-rose-600 font-semibold">
-              − Výdaj
-            </button>
-          </div>
-
-          <button @click="closeModal"
-                  class="w-full mt-2 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
-            Zrušiť
-          </button>
-        </div>
-
-        <!-- Error Case -->
-        <div v-else class="text-center">
+        <div class="text-center">
           <div class="mb-4 text-red-500">
             <XCircle class="w-12 h-12 mx-auto" />
           </div>
           <h2 class="text-xl font-bold mb-2">Položka nenájdená</h2>
-          <p class="text-gray-600 mb-4">Skúste naskenovať QR kód znova</p>
+          <p class="text-gray-600 mb-4">Skúste naskenovať QR kód znova alebo použite manuálny výber</p>
           <button @click="closeModal"
                   class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
             Zavrieť
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual Selection Modal -->
+    <div v-if="showManualSelect"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+         @click.self="showManualSelect = false">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Vyberte úrodu</h2>
+
+        <div v-if="loadingStocks" class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+        </div>
+
+        <div v-else>
+          <select
+            v-model="selectedStockId"
+            class="w-full p-3 border rounded-lg mb-4"
+            @change="onManualSelect"
+          >
+            <option value="">-- Vyberte úrodu --</option>
+            <option v-for="stock in availableStocks" :key="stock.id" :value="stock.id">
+              {{ stock.crop.name }} - {{ stock.quantity }} {{ stock.unitOfMeasure }}
+            </option>
+          </select>
+
+          <button
+            @click="showManualSelect = false"
+            class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
+          >
+            Zrušiť
           </button>
         </div>
       </div>
@@ -61,15 +75,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-vue-next'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ArrowLeft, XCircle } from 'lucide-vue-next'
 import { QrcodeStream } from 'vue-qrcode-reader'
+import { stockApi } from '../services/api'
 
 const router = useRouter()
+const route = useRoute()
 const showModal = ref(false)
 const foundStock = ref(null)
 const isProcessing = ref(false)
+const showManualSelect = ref(false)
+const availableStocks = ref([])
+const loadingStocks = ref(false)
+const selectedStockId = ref('')
+
+// Get mode from route query (in or out)
+const mode = computed(() => route.query.mode || 'in')
+
+onMounted(async () => {
+  loadingStocks.value = true
+  try {
+    const response = await stockApi.getAllStocks()
+    availableStocks.value = response.data
+  } catch (error) {
+    console.error('Failed to load stocks:', error)
+  } finally {
+    loadingStocks.value = false
+  }
+})
 
 const onError = (error) => {
   console.error('Camera error:', error)
@@ -90,10 +125,12 @@ const onDetect = async (detectedCodes) => {
 
     if (response.ok) {
       foundStock.value = await response.json()
+      // Directly proceed with the mode from route
+      proceedToAdjust(mode.value)
     } else {
       foundStock.value = null
+      showModal.value = true
     }
-    showModal.value = true
   } catch (error) {
     console.error('API error:', error)
     foundStock.value = null
@@ -110,6 +147,19 @@ const proceedToAdjust = (type) => {
       params: { stockId: foundStock.value.batchCode },
       query: { type }  // 'in' alebo 'out'
     })
+  }
+}
+
+const onManualSelect = () => {
+  if (selectedStockId.value) {
+    const stock = availableStocks.value.find(s => s.id === parseInt(selectedStockId.value))
+    if (stock) {
+      foundStock.value = stock
+      showManualSelect.value = false
+      selectedStockId.value = ''
+      // Directly proceed with the mode from route
+      proceedToAdjust(mode.value)
+    }
   }
 }
 

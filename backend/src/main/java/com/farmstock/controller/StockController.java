@@ -74,4 +74,15 @@ public class StockController {
         StockConfigDTO config = new StockConfigDTO(stockService.getDeleteThreshold());
         return ResponseEntity.ok(config);
     }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<List<Stock>> getAllDeletedStocks() {
+        return ResponseEntity.ok(stockService.getAllDeletedStocks());
+    }
+
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<Stock> restoreStock(@PathVariable Long id) {
+        Stock restored = stockService.restoreStock(id);
+        return ResponseEntity.ok(restored);
+    }
 }

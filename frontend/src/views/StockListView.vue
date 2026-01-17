@@ -35,30 +35,34 @@
             <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Názov</th>
             <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Množstvo</th>
             <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">QR kód</th>
-            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700" style="min-width: 80px;">Akcie</th>
           </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-          <tr v-for="stock in stocks" :key="stock.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">{{ stock.crop.name }}</td>
+          <tr
+            v-for="stock in stocks"
+            :key="stock.id"
+            class="hover:bg-gray-50 cursor-pointer"
+            @touchstart="handleTouchStart(stock, $event)"
+            @touchend="handleTouchEnd(stock, $event)"
+            @touchmove="handleTouchMove"
+            @mousedown="handleMouseDown(stock, $event)"
+            @mouseup="handleMouseUp(stock, $event)"
+            @mouseleave="handleMouseUp(stock, $event)"
+          >
+            <td class="px-4 py-3">
+              <div>
+                <p class="font-medium text-gray-900">{{ stock.crop.name }}</p>
+                <p class="text-sm text-gray-500">{{ formatDate(stock.harvestDate) }}</p>
+              </div>
+            </td>
             <td class="px-4 py-3">{{ stock.quantity }} {{ stock.unitOfMeasure }}</td>
             <td class="px-4 py-3 text-center">
               <button
-                  @click="showQRCode(stock)"
+                  @click.stop="showQRCode(stock)"
                   class="text-blue-600 hover:text-blue-800 p-1"
                   title="Zobraziť QR kód"
               >
                 <QrCode class="w-5 h-5" />
-              </button>
-            </td>
-            <td class="px-4 py-3 text-center">
-              <button
-                  v-if="stock.quantity <= deleteThreshold"
-                  @click="confirmDelete(stock)"
-                  class="text-red-600 hover:text-red-800 p-1"
-                  title="Zmazať položku"
-              >
-                <Trash2 class="w-5 h-5" />
               </button>
             </td>
           </tr>
@@ -124,22 +128,130 @@
         </div>
       </div>
 
+      <!-- Stock Detail Modal -->
+      <div v-if="showDetailModal"
+           class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+           @click.self="closeDetailModal">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Detail úrody</h2>
+            <button @click="closeDetailModal" class="text-gray-500 hover:text-gray-700">
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Crop Name -->
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Názov úrody</p>
+              <p class="text-lg font-bold text-gray-900">{{ detailStock?.crop.name }}</p>
+            </div>
+
+            <!-- Batch Code -->
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Kód šarže</p>
+              <p class="text-base text-gray-800 font-mono">{{ detailStock?.batchCode }}</p>
+            </div>
+
+            <!-- Quantity -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Množstvo</p>
+                <p class="text-base font-semibold text-gray-800">{{ detailStock?.quantity }} {{ detailStock?.unitOfMeasure }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Kvalita</p>
+                <p class="text-base text-gray-800">{{ detailStock?.qualityGrade || '—' }}</p>
+              </div>
+            </div>
+
+            <!-- Harvest Date -->
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Dátum zberu</p>
+              <p class="text-base text-gray-800">{{ formatDate(detailStock?.harvestDate) }}</p>
+            </div>
+
+            <!-- Storage Location -->
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Miesto skladovania</p>
+              <p class="text-base text-gray-800">{{ detailStock?.storageLocation || '—' }}</p>
+            </div>
+
+            <!-- Variety -->
+            <div v-if="detailStock?.crop.variety">
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Odroda</p>
+              <p class="text-base text-gray-800">{{ detailStock?.crop.variety }}</p>
+            </div>
+
+            <!-- Harvest Season -->
+            <div v-if="detailStock?.crop.harvestSeason">
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Sezóna zberu</p>
+              <p class="text-base text-gray-800">{{ detailStock?.crop.harvestSeason }}</p>
+            </div>
+
+            <!-- Crop Description -->
+            <div v-if="detailStock?.crop.description">
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Popis plodiny</p>
+              <p class="text-base text-gray-800">{{ detailStock?.crop.description }}</p>
+            </div>
+
+            <!-- Storage Conditions -->
+            <div v-if="detailStock?.crop.storageConditions">
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Podmienky skladovania</p>
+              <p class="text-base text-gray-800">{{ detailStock?.crop.storageConditions }}</p>
+            </div>
+
+            <!-- Notes -->
+            <div v-if="detailStock?.notes">
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Poznámky</p>
+              <p class="text-base text-gray-800">{{ detailStock?.notes }}</p>
+            </div>
+          </div>
+
+          <div class="mt-6 space-y-2">
+            <button
+              @click="confirmDeleteFromDetail"
+              class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 flex items-center justify-center gap-2"
+            >
+              <Trash2 class="w-4 h-4" />
+              Skryť úrodu
+            </button>
+            <button
+              @click="closeDetailModal"
+              class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300"
+            >
+              Zavrieť
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Delete Confirmation Modal -->
       <div v-if="showDeleteConfirm"
-           class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+           class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]"
+           @click.self="cancelDelete">
         <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-          <h2 class="text-xl font-bold mb-4">Potvrdenie vymazania</h2>
-          <p class="text-gray-600 mb-6">
-            Naozaj chcete zmazať položku <strong>{{ stockToDelete?.crop.name }}</strong>?
-            <br><br>
-            Táto akcia sa nedá vrátiť späť.
+          <h2 class="text-xl font-bold mb-4">Skryť úrodu?</h2>
+          <p class="text-gray-600 mb-2">
+            <strong>{{ stockToDelete?.crop.name }}</strong>
           </p>
+          <p class="text-sm text-gray-500 mb-4">
+            Dátum zberu: {{ formatDate(stockToDelete?.harvestDate) }}
+            <br>
+            Množstvo: {{ stockToDelete?.quantity }} {{ stockToDelete?.unitOfMeasure }}
+          </p>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <p class="text-sm text-blue-800">
+              <strong>ℹ️ Informácia:</strong><br>
+              Úroda bude skrytá zo zoznamu, ale zostane uložená v systéme. Všetky záznamy o naskladneniach a výberoch budú zachované.
+            </p>
+          </div>
           <div class="flex gap-2">
             <button
               @click="deleteStock"
-              class="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
+              class="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600"
             >
-              Zmazať
+              Skryť úrodu
             </button>
             <button
               @click="cancelDelete"
@@ -172,7 +284,14 @@ const selectedStock = ref(null)
 const isFullscreen = ref(false)
 const showDeleteConfirm = ref(false)
 const stockToDelete = ref(null)
+const showDetailModal = ref(false)
+const detailStock = ref(null)
 const deleteThreshold = computed(() => stockStore.deleteThreshold)
+
+// Long press state
+let longPressTimer = null
+let longPressStock = null
+let wasLongPress = false
 
 onMounted(async () => {
   try {
@@ -212,7 +331,7 @@ onUnmounted(() => {
 })
 
 const navigateBack = () => {
-  router.push('/farma')
+  router.push('/farm')
 }
 
 const formatDate = (dateString) => {
@@ -433,8 +552,101 @@ const printAllQR = async () => {
   printWindow.document.close()
 }
 
+// Detail modal handlers
+const showDetailView = (stock) => {
+  detailStock.value = stock
+  showDetailModal.value = true
+}
+
+const closeDetailModal = () => {
+  detailStock.value = null
+  showDetailModal.value = false
+}
+
+// Long press handlers
+const handleTouchStart = (stock, event) => {
+  // Ignore clicks on buttons
+  if (event.target.closest('button')) return
+
+  wasLongPress = false
+  longPressStock = stock
+
+  longPressTimer = setTimeout(() => {
+    if (longPressStock) {
+      wasLongPress = true
+      confirmDelete(stock)
+    }
+  }, 800) // 800ms for long press
+}
+
+const handleTouchEnd = (stock, event) => {
+  // Ignore clicks on buttons
+  if (event.target.closest('button')) return
+
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+
+  // If it wasn't a long press, show detail modal
+  if (!wasLongPress && longPressStock) {
+    showDetailView(longPressStock)
+  }
+
+  longPressStock = null
+  wasLongPress = false
+}
+
+const handleTouchMove = () => {
+  // Cancel long press if user moves finger
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+  longPressStock = null
+  wasLongPress = false
+}
+
+const handleMouseDown = (stock, event) => {
+  // Ignore clicks on buttons
+  if (event.target.closest('button')) return
+
+  wasLongPress = false
+  longPressStock = stock
+
+  longPressTimer = setTimeout(() => {
+    if (longPressStock) {
+      wasLongPress = true
+      confirmDelete(stock)
+    }
+  }, 800) // 800ms for long press
+}
+
+const handleMouseUp = (stock, event) => {
+  // Ignore clicks on buttons
+  if (event.target.closest('button')) return
+
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+
+  // If it wasn't a long press, show detail modal
+  if (!wasLongPress && longPressStock) {
+    showDetailView(longPressStock)
+  }
+
+  longPressStock = null
+  wasLongPress = false
+}
+
 const confirmDelete = (stock) => {
   stockToDelete.value = stock
+  showDeleteConfirm.value = true
+}
+
+const confirmDeleteFromDetail = () => {
+  stockToDelete.value = detailStock.value
   showDeleteConfirm.value = true
 }
 
@@ -450,9 +662,11 @@ const deleteStock = async () => {
     // Remove from local list
     stocks.value = stocks.value.filter(s => s.id !== stockToDelete.value.id)
 
-    // Close modal
+    // Close both modals
     showDeleteConfirm.value = false
+    showDetailModal.value = false
     stockToDelete.value = null
+    detailStock.value = null
   } catch (error) {
     console.error('Failed to delete stock:', error)
     const errorMessage = error.response?.data?.message || 'Nepodarilo sa zmazať položku'

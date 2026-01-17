@@ -5,7 +5,7 @@
       <button @click="goBack" class="mr-4">
         <ArrowLeft class="w-6 h-6" />
       </button>
-      <h1 class="text-xl">Nová položka</h1>
+      <h1 class="text-xl">Nová úroda</h1>
     </div>
 
     <div class="flex-grow p-4">
@@ -26,7 +26,7 @@
               <option v-for="crop in crops"
                       :key="crop.id"
                       :value="crop.id">
-                {{ crop.name }} ({{ crop.variety }})
+                {{ crop.name }}{{ crop.variety ? ' - ' + crop.variety : '' }}
               </option>
               <option value="new">+ Pridať novú plodinu</option>
             </select>
@@ -154,7 +154,7 @@
                 Jednotka
               </label>
               <select
-                  v-model="form.unit"
+                  v-model="form.unitOfMeasure"
                   required
                   class="w-full p-2 border rounded-md"
               >
@@ -167,10 +167,11 @@
         </div>
         <!-- Submit Button -->
         <button
+            v-if="(selectedCropId && selectedCropId !== 'new') || (isAddingNewCrop && newCrop.name && newCrop.variety)"
             type="submit"
             class="w-full bg-[#94c1e8] text-white py-3 rounded-lg hover:bg-[#7eb3e2]"
         >
-          Vytvoriť položku
+          Vytvoriť úrodu
         </button>
       </form>
     </div>
@@ -178,20 +179,28 @@
     <div v-if="showQRModal"
          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full">
-        <h2 class="text-xl font-bold mb-4">Položka vytvorená</h2>
+        <h2 class="text-xl font-bold mb-4">Úroda vytvorená</h2>
         <div class="flex justify-center mb-4 qr-canvas">
           <VueQrcode :value="createdItem?.batchCode || ''" :options="{ width: 200 }" />
         </div>
         <p class="text-center mb-4 text-gray-600">
           Kód: {{ createdItem?.batchCode }}
         </p>
-        <div class="flex gap-2">
-          <button @click="downloadQR"
-                  class="flex-1 bg-[#94c1e8] text-white py-2 rounded-lg hover:bg-[#7eb3e2]">
-            Stiahnuť QR
-          </button>
+        <div class="flex flex-col gap-2">
+          <div class="flex gap-2">
+            <button @click="downloadQR"
+                    class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2">
+              <Download class="w-4 h-4" />
+              Stiahnuť
+            </button>
+            <button @click="printQR"
+                    class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2">
+              <Printer class="w-4 h-4" />
+              Tlačiť
+            </button>
+          </div>
           <button @click="closeModal"
-                  class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
+                  class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300">
             Zavrieť
           </button>
         </div>
@@ -203,7 +212,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, Download, Printer } from 'lucide-vue-next'
 import VueQrcode from 'qrcode.vue'
 
 const router = useRouter()
@@ -215,10 +224,10 @@ const showQRModal = ref(false)
 
 // Initialize form with all required fields
 const form = ref({
-  name: '',
-  variety: '',
   quantity: '',
   unitOfMeasure: 'kg',
+  storageLocation: 'Hlavný sklad',
+  qualityGrade: 'A',
   harvestDay: new Date().getDate(),
   harvestMonth: new Date().getMonth() + 1,
   harvestYear: new Date().getFullYear(),
@@ -251,17 +260,52 @@ onMounted(async () => {
 
 const submitForm = async () => {
   try {
+    // Get crop info based on selection
+    let cropName, cropVariety, cropDescription, cropStorageConditions, cropHarvestSeason
+
+    if (selectedCropId.value) {
+      // Using existing crop
+      const selectedCrop = crops.value.find(c => c.id === selectedCropId.value)
+      if (!selectedCrop) {
+        alert('Prosím vyberte plodinu')
+        return
+      }
+      cropName = selectedCrop.name
+      cropVariety = selectedCrop.variety
+      cropDescription = selectedCrop.description || ''
+      cropStorageConditions = selectedCrop.storageConditions || ''
+      cropHarvestSeason = selectedCrop.harvestSeason || ''
+    } else if (isAddingNewCrop.value && newCrop.value.name && newCrop.value.variety) {
+      // Creating new crop inline
+      cropName = newCrop.value.name
+      cropVariety = newCrop.value.variety
+      cropDescription = ''
+      cropStorageConditions = ''
+      cropHarvestSeason = ''
+    } else {
+      alert('Prosím vyberte alebo vytvorte plodinu')
+      return
+    }
+
+    const harvestDate = new Date(
+        form.value.harvestYear,
+        form.value.harvestMonth - 1,
+        form.value.harvestDay
+    )
+
     const stockData = {
-      name: newCrop.value.name,
-      variety: newCrop.value.variety,
-      quantity: form.value.quantity,
+      cropName: cropName,
+      variety: cropVariety,
+      description: cropDescription,
+      storageConditions: cropStorageConditions,
+      harvestSeason: cropHarvestSeason,
+      quantity: parseFloat(form.value.quantity),
       unitOfMeasure: form.value.unitOfMeasure,
-      harvestDate: new Date(
-          form.value.harvestYear,
-          form.value.harvestMonth - 1,
-          form.value.harvestDay
-      ).toISOString(),
-      notes: form.value.notes
+      storageLocation: form.value.storageLocation || 'Hlavný sklad',
+      harvestDate: harvestDate.toISOString(),
+      qualityGrade: form.value.qualityGrade || 'A',
+      notes: form.value.notes || '',
+      batchCode: generateBatchCode(cropName)
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock`, {
@@ -272,13 +316,26 @@ const submitForm = async () => {
       body: JSON.stringify(stockData)
     })
 
-    if (!response.ok) throw new Error('Failed to create stock')
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error('Failed to create stock: ' + error)
+    }
+
     const stock = await response.json()
-    createdItem.value = stock // Contains batchCode
+    createdItem.value = stock
     showQRModal.value = true
   } catch (error) {
     console.error('Failed to create stock:', error)
+    alert('Nepodarilo sa vytvoriť úrodu: ' + error.message)
   }
+}
+
+const generateBatchCode = (cropName) => {
+  const date = new Date()
+  const prefix = cropName.substring(0, 3).toUpperCase()
+  const datePart = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}`
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  return `${prefix}-${datePart}-${random}`
 }
 
 const downloadQR = () => {
@@ -290,6 +347,61 @@ const downloadQR = () => {
   link.download = `QR-${createdItem.value.batchCode}.png`
   link.href = url
   link.click()
+}
+
+const printQR = () => {
+  const canvas = document.querySelector('.qr-canvas canvas')
+  if (!canvas) return
+
+  const printWindow = window.open('', '_blank')
+  const imageUrl = canvas.toDataURL('image/png')
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>QR Kód - ${createdItem.value.crop?.name || 'Úroda'}</title>
+      <style>
+        body {
+          margin: 0;
+          padding: 20px;
+          text-align: center;
+          font-family: Arial, sans-serif;
+        }
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+        .info {
+          margin-top: 20px;
+          font-size: 14px;
+        }
+        @media print {
+          body {
+            padding: 0;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <img src="${imageUrl}" alt="QR Code" />
+      <div class="info">
+        <h2>${createdItem.value.crop?.name || 'Úroda'}</h2>
+        <p>Kód: ${createdItem.value.batchCode}</p>
+        <p>Množstvo: ${createdItem.value.quantity} ${createdItem.value.unitOfMeasure}</p>
+      </div>
+      <script>
+        window.onload = function() {
+          window.print();
+          window.onafterprint = function() {
+            window.close();
+          }
+        }
+      <\/script>
+    </body>
+    </html>
+  `)
+  printWindow.document.close()
 }
 
 const closeModal = () => {

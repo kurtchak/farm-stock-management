@@ -19,7 +19,7 @@ public class StockMovement {
     private Stock stock;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(name = "movement_type", nullable = false)

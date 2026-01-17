@@ -24,6 +24,9 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     @Query("SELECT s FROM Stock s WHERE s.deleted = false")
     List<Stock> findAllActive();
 
+    @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop WHERE s.deleted = true")
+    List<Stock> findAllDeleted();
+
     List<Stock> findByCropId(Long cropId);
 
     @Query("SELECT s FROM Stock s WHERE s.crop.id = :cropId AND s.deleted = false")

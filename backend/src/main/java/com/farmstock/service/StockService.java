@@ -9,6 +9,7 @@ import com.farmstock.model.StockAdjustmentRequest;
 import com.farmstock.model.StockMovement;
 import com.farmstock.repository.CropRepository;
 import com.farmstock.repository.StockRepository;
+import com.farmstock.repository.StockMovementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +26,15 @@ import java.util.Optional;
 public class StockService {
     private final StockRepository stockRepository;
     private final CropRepository cropRepository;
+    private final StockMovementRepository stockMovementRepository;
     private final StockProperties stockProperties;
 
     @Autowired
-    public StockService(StockRepository stockRepository, CropRepository cropRepository, StockProperties stockProperties) {
+    public StockService(StockRepository stockRepository, CropRepository cropRepository,
+                        StockMovementRepository stockMovementRepository, StockProperties stockProperties) {
         this.stockRepository = stockRepository;
         this.cropRepository = cropRepository;
+        this.stockMovementRepository = stockMovementRepository;
         this.stockProperties = stockProperties;
     }
 
@@ -47,15 +51,18 @@ public class StockService {
         // Update quantity
         stock.setQuantity(stock.getQuantity().add(request.getQuantity()));
 
+        // Create and save stock movement
         StockMovement movement = new StockMovement();
         movement.setStock(stock);
         movement.setQuantity(request.getQuantity());
         movement.setMovementType(request.getMovementType());
         movement.setReason(request.getReason());
+        stockMovementRepository.save(movement);
 
         return stockRepository.save(stock);
     }
 
+    @Transactional
     public Stock createStock(CreateStockRequest request) {
         Crop crop = new Crop();
         crop.setName(request.getCropName());
@@ -99,16 +106,24 @@ public class StockService {
         Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found with id: " + id));
 
-        // Only allow deletion if quantity is at or below threshold
-        if (stock.getQuantity().compareTo(stockProperties.getDeleteThreshold()) > 0) {
-            throw new IllegalStateException("Cannot delete stock with quantity greater than threshold: " + stockProperties.getDeleteThreshold());
-        }
-
         stock.setDeleted(true);
         stockRepository.save(stock);
     }
 
     public BigDecimal getDeleteThreshold() {
         return stockProperties.getDeleteThreshold();
+    }
+
+    public List<Stock> getAllDeletedStocks() {
+        return stockRepository.findAllDeleted();
+    }
+
+    @Transactional
+    public Stock restoreStock(Long id) {
+        Stock stock = stockRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found with id: " + id));
+
+        stock.setDeleted(false);
+        return stockRepository.save(stock);
     }
 }

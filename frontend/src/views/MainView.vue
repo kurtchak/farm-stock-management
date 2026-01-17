@@ -15,6 +15,7 @@
           </h1>
         </div>
         <button
+            v-if="settingsEnabled"
             @click="navigateToSettings"
             class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 active:bg-gray-100 transition-colors"
         >
@@ -38,7 +39,7 @@
           <div class="absolute bottom-3 right-4 text-4xl opacity-30">🌾</div>
 
           <p class="text-green-100 text-sm">Celkom na sklade</p>
-          <p class="text-3xl font-extrabold mb-4">{{ totalItems }} položiek</p>
+          <p class="text-3xl font-extrabold mb-4">{{ totalItems }} {{ getItemsLabel(totalItems) }}</p>
 
         <div class="flex gap-6">
           <div>
@@ -47,7 +48,7 @@
           </div>
           <div>
             <p class="text-[11px] text-green-200 uppercase tracking-wide">Predané</p>
-            <p class="text-base font-bold">{{ weeklyOut }} položky</p>
+            <p class="text-base font-bold">{{ weeklyOut }} {{ getItemsLabel(weeklyOut) }}</p>
           </div>
         </div>
       </div>
@@ -107,8 +108,24 @@
             <Plus class="w-5 h-5 text-gray-500" />
           </div>
           <div class="text-left">
-            <p class="text-sm font-bold text-gray-700">Nová plodina</p>
-            <p class="text-[11px] text-gray-400">Pridať do katalógu</p>
+            <p class="text-sm font-bold text-gray-700">Nová úroda</p>
+            <p class="text-[11px] text-gray-400">Naskladniť úrodu</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Tertiary Actions -->
+      <div v-if="deletedStocksCount > 0">
+        <button
+            @click="navigateToDeleted"
+            class="w-full bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
+        >
+          <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+            <Archive class="w-5 h-5 text-orange-600" />
+          </div>
+          <div class="text-left">
+            <p class="text-sm font-bold text-gray-700">Archivované úrody</p>
+            <p class="text-[11px] text-gray-400">{{ deletedStocksCount }} {{ getDeletedItemsLabel(deletedStocksCount) }}</p>
           </div>
         </button>
       </div>
@@ -163,11 +180,14 @@ import {
   ArrowUpFromLine,
   Package,
   Plus,
-  Settings
+  Settings,
+  Archive
 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useStockStore } from '../stores/stock'
+import { stockApi } from '../services/api'
+import { features } from '../config/features'
 
 const router = useRouter()
 const stockStore = useStockStore()
@@ -179,10 +199,27 @@ const weeklyOut = computed(() => stockStore.weeklyOutCount)
 const recentActivity = computed(() => stockStore.formattedRecentMovements)
 const loading = computed(() => stockStore.loading)
 
+// Feature flags
+const settingsEnabled = features.settings.enabled
+
+// Deleted stocks count
+const deletedStocksCount = ref(0)
+
 // Load data on mount
 onMounted(async () => {
   await stockStore.fetchDashboardData()
+  await loadDeletedStocksCount()
 })
+
+const loadDeletedStocksCount = async () => {
+  try {
+    const response = await stockApi.getDeletedStocks()
+    deletedStocksCount.value = response.data.length
+  } catch (error) {
+    console.error('Failed to load deleted stocks count:', error)
+    deletedStocksCount.value = 0
+  }
+}
 
 // Navigation
 const navigateBack = () => {
@@ -212,4 +249,21 @@ const navigateToHistory = () => {
 const navigateToSettings = () => {
   router.push('/settings')
 }
-</script>pozr
+
+const navigateToDeleted = () => {
+  router.push('/deleted-stocks')
+}
+
+// Slovak declension helper
+const getItemsLabel = (count) => {
+  if (count === 1) return 'položka'
+  if (count >= 2 && count <= 4) return 'položky'
+  return 'položiek'
+}
+
+const getDeletedItemsLabel = (count) => {
+  if (count === 1) return 'skrytá položka'
+  if (count >= 2 && count <= 4) return 'skryté položky'
+  return 'skrytých položiek'
+}
+</script>

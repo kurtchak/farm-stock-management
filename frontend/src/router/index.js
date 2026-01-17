@@ -7,13 +7,13 @@ const routes = [
     component: () => import('../views/HubView.vue')
   },
   {
-    path: '/farma',
-    name: 'Farma',
+    path: '/farm',
+    name: 'Farm',
     component: () => import('../views/MainView.vue')
   },
   {
-    path: '/zahrady',
-    name: 'Zahrady',
+    path: '/gardens',
+    name: 'Gardens',
     component: () => import('../views/ZahradyView.vue')
   },
   {
@@ -40,6 +40,16 @@ const routes = [
     path: '/stocks',
     name: 'stocks',
     component: () => import('../views/StockListView.vue')
+  },
+  {
+    path: '/deleted-stocks',
+    name: 'deleted-stocks',
+    component: () => import('../views/DeletedStocksView.vue')
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('../views/SettingsView.vue')
   }
 ]
 

@@ -56,6 +56,9 @@
                 <p v-if="!isIncoming" class="text-sm text-gray-500 mt-1">
                   Maximálne množstvo: {{ stock.quantity }} {{ stock.unitOfMeasure }}
                 </p>
+                <p v-if="showQuantityError" class="text-sm text-red-600 font-medium mt-1">
+                  ⚠️ Nedostatočné množstvo na sklade. Dostupné: {{ stock.quantity }} {{ stock.unitOfMeasure }}
+                </p>
               </div>
 
               <div>
@@ -111,6 +114,13 @@ const isValidQuantity = computed(() => {
     return qty > 0
   }
   return qty > 0 && qty <= stock.value?.quantity
+})
+
+const showQuantityError = computed(() => {
+  if (isIncoming.value) return false
+  const qty = parseFloat(quantity.value)
+  if (isNaN(qty) || qty <= 0) return false
+  return qty > stock.value?.quantity
 })
 
 onMounted(async () => {

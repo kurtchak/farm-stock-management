@@ -59,10 +59,10 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const navigateToZahrady = () => {
-  router.push('/zahrady')
+  router.push('/gardens')
 }
 
 const navigateToFarma = () => {
-  router.push('/farma')
+  router.push('/farm')
 }
 </script>

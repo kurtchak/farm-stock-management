@@ -38,6 +38,16 @@ export const stockApi = {
   // Delete stock
   deleteStock(stockId) {
     return apiClient.delete(`/api/stock/${stockId}`)
+  },
+
+  // Get all deleted stocks
+  getDeletedStocks() {
+    return apiClient.get('/api/stock/deleted')
+  },
+
+  // Restore deleted stock
+  restoreStock(stockId) {
+    return apiClient.post(`/api/stock/${stockId}/restore`)
   }
 }
 
