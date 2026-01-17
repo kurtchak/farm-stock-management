@@ -1,5 +1,6 @@
 package com.farmstock.service;
 
+import com.farmstock.config.StockProperties;
 import com.farmstock.exception.ResourceNotFoundException;
 import com.farmstock.model.CreateStockRequest;
 import com.farmstock.model.Crop;
@@ -24,11 +25,13 @@ import java.util.Optional;
 public class StockService {
     private final StockRepository stockRepository;
     private final CropRepository cropRepository;
+    private final StockProperties stockProperties;
 
     @Autowired
-    public StockService(StockRepository stockRepository, CropRepository cropRepository) {
+    public StockService(StockRepository stockRepository, CropRepository cropRepository, StockProperties stockProperties) {
         this.stockRepository = stockRepository;
         this.cropRepository = cropRepository;
+        this.stockProperties = stockProperties;
     }
 
     @Transactional
@@ -88,7 +91,24 @@ public class StockService {
     }
 
     public List<Stock> getAllStocks() {
-        return stockRepository.findAll();
-//        return stockRepository.findAllWithCrop();
+        return stockRepository.findAllActive();
+    }
+
+    @Transactional
+    public void softDeleteStock(Long id) {
+        Stock stock = stockRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found with id: " + id));
+
+        // Only allow deletion if quantity is at or below threshold
+        if (stock.getQuantity().compareTo(stockProperties.getDeleteThreshold()) > 0) {
+            throw new IllegalStateException("Cannot delete stock with quantity greater than threshold: " + stockProperties.getDeleteThreshold());
+        }
+
+        stock.setDeleted(true);
+        stockRepository.save(stock);
+    }
+
+    public BigDecimal getDeleteThreshold() {
+        return stockProperties.getDeleteThreshold();
     }
 }

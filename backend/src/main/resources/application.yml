@@ -12,6 +12,8 @@ app:
   jwt:
     secret: ${JWT_SECRET:default-dev-secret}
     expiration: 86400000
+  stock:
+    delete-threshold: 10000.0
 
 logging:
   level:

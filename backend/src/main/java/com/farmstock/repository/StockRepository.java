@@ -18,12 +18,16 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
             " FROM stocks WHERE batch_code LIKE :pattern", nativeQuery = true)
     Optional<Integer> findMaxSequenceForPattern(@Param("pattern") String pattern);
 
-    @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop")
+    @Query("SELECT s FROM Stock s LEFT JOIN FETCH s.crop WHERE s.deleted = false")
     List<Stock> findAllWithCrop();
 
-    List<Stock> findAll();
+    @Query("SELECT s FROM Stock s WHERE s.deleted = false")
+    List<Stock> findAllActive();
 
     List<Stock> findByCropId(Long cropId);
+
+    @Query("SELECT s FROM Stock s WHERE s.crop.id = :cropId AND s.deleted = false")
+    List<Stock> findActiveByCropId(@Param("cropId") Long cropId);
 
     @Query("SELECT COALESCE(SUM(s.quantity), 0) FROM Stock s WHERE s.crop.id = :cropId")
     BigDecimal getTotalQuantityByCropId(@Param("cropId") Long cropId);

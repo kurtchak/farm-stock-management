@@ -47,6 +47,9 @@ public class Stock {
 
     private String notes;
 
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -4,8 +4,10 @@ import com.farmstock.exception.ResourceNotFoundException;
 import com.farmstock.model.CreateStockRequest;
 import com.farmstock.model.Stock;
 import com.farmstock.model.StockAdjustmentRequest;
+import com.farmstock.model.StockConfigDTO;
 import com.farmstock.service.StockService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,5 +61,17 @@ public class StockController {
             @RequestBody StockAdjustmentRequest request) {
         Stock adjusted = stockService.adjustStock(id, request);
         return ResponseEntity.ok(adjusted);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStock(@PathVariable Long id) {
+        stockService.softDeleteStock(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<StockConfigDTO> getStockConfig() {
+        StockConfigDTO config = new StockConfigDTO(stockService.getDeleteThreshold());
+        return ResponseEntity.ok(config);
     }
 }

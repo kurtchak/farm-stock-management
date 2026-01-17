@@ -176,14 +176,14 @@
     </div>
     <!-- QR Code Modal -->
     <div v-if="showQRModal"
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-lg p-6 max-w-sm w-full">
         <h2 class="text-xl font-bold mb-4">Položka vytvorená</h2>
-        <div class="flex justify-center mb-4">
-          <QRCode :value="createdItem.batchCode" :options="{ width: 200 }" />
+        <div class="flex justify-center mb-4 qr-canvas">
+          <VueQrcode :value="createdItem?.batchCode || ''" :options="{ width: 200 }" />
         </div>
         <p class="text-center mb-4 text-gray-600">
-          Kód: {{ createdItem.batchCode }}
+          Kód: {{ createdItem?.batchCode }}
         </p>
         <div class="flex gap-2">
           <button @click="downloadQR"
@@ -204,12 +204,13 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
+import VueQrcode from 'qrcode.vue'
 
 const router = useRouter()
 const crops = ref([])
 const selectedCropId = ref('')
 const isAddingNewCrop = ref(false)
-const createdStock = ref(null)
+const createdItem = ref(null)
 const showQRModal = ref(false)
 
 // Initialize form with all required fields
@@ -272,12 +273,32 @@ const submitForm = async () => {
     })
 
     if (!response.ok) throw new Error('Failed to create stock')
-    const createdStock = await response.json()
+    const stock = await response.json()
+    createdItem.value = stock // Contains batchCode
     showQRModal.value = true
-    createdStock.value = response.data // Contains batchCode
   } catch (error) {
     console.error('Failed to create stock:', error)
   }
+}
+
+const downloadQR = () => {
+  const canvas = document.querySelector('.qr-canvas canvas')
+  if (!canvas) return
+
+  const url = canvas.toDataURL('image/png')
+  const link = document.createElement('a')
+  link.download = `QR-${createdItem.value.batchCode}.png`
+  link.href = url
+  link.click()
+}
+
+const closeModal = () => {
+  showQRModal.value = false
+  router.push('/stocks')
+}
+
+const goBack = () => {
+  router.back()
 }
 
 const saveNewCrop = async () => {
