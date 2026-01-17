@@ -14,6 +14,8 @@ app:
     expiration: 86400000
   stock:
     delete-threshold: 10000.0
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
 
 logging:
   level:
