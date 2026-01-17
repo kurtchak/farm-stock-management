@@ -97,6 +97,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import {ArrowLeft, ArrowDownCircle, ArrowUpCircle} from 'lucide-vue-next'
+import { stockApi } from '../services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -126,9 +127,8 @@ const showQuantityError = computed(() => {
 onMounted(async () => {
   try {
     const batchCode = route.params.stockId
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${batchCode}`)
-    if (!response.ok) throw new Error('Položka nebola nájdená')
-    stock.value = await response.json()
+    const response = await stockApi.getStockByBatchCode(batchCode)
+    stock.value = response.data
   } catch (e) {
     error.value = 'Nepodarilo sa načítať položku'
   } finally {
@@ -146,19 +146,11 @@ const submitAdjustment = async () => {
         ? parseFloat(quantity.value)
         : -parseFloat(quantity.value)
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/${stock.value.id}/adjust`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        quantity: adjustedQuantity,
-        movementType: isIncoming.value ? 'IN' : 'OUT',
-        reason: note.value || (isIncoming.value ? 'Príjem' : 'Výdaj')
-      })
+    await stockApi.adjustStock(stock.value.id, {
+      quantity: adjustedQuantity,
+      movementType: isIncoming.value ? 'IN' : 'OUT',
+      reason: note.value || (isIncoming.value ? 'Príjem' : 'Výdaj')
     })
-
-    if (!response.ok) throw new Error('Nepodarilo sa upraviť množstvo')
 
     router.push('/')
   } catch (e) {

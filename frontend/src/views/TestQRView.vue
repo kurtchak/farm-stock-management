@@ -20,13 +20,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import VueQrcode from 'qrcode.vue'
+import { stockApi } from '../services/api'
 
 const stocks = ref([])
 
 onMounted(async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock`)
-    stocks.value = await response.json()
+    const response = await stockApi.getAllStocks()
+    stocks.value = response.data
   } catch (error) {
     console.error('Failed to load stocks:', error)
   }

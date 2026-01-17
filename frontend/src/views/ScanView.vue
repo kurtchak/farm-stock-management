@@ -121,16 +121,10 @@ const onDetect = async (detectedCodes) => {
   console.log('QR value:', qrValue)
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock/batch/${qrValue}`)
-
-    if (response.ok) {
-      foundStock.value = await response.json()
-      // Directly proceed with the mode from route
-      proceedToAdjust(mode.value)
-    } else {
-      foundStock.value = null
-      showModal.value = true
-    }
+    const response = await stockApi.getStockByBatchCode(qrValue)
+    foundStock.value = response.data
+    // Directly proceed with the mode from route
+    proceedToAdjust(mode.value)
   } catch (error) {
     console.error('API error:', error)
     foundStock.value = null

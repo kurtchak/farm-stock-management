@@ -38,10 +38,10 @@
             <div class="text-left">
               <h3 class="font-semibold text-gray-800 mb-2 text-base">Pripravované funkcie:</h3>
               <ul class="text-gray-600 space-y-1 text-sm">
-                <li>• Správa záhradných plôch</li>
-                <li>• Sledovanie výsadby a starostlivosti</li>
-                <li>• Plánovanie záhradných prác</li>
-                <li>• Evidencia nástrojov a materiálu</li>
+                <li>• Správa záhradných plôch ?</li>
+                <li>• Sledovanie výsadby a starostlivosti ?</li>
+                <li>• Plánovanie záhradných prác ?</li>
+                <li>• Evidencia nástrojov a materiálu ?</li>
               </ul>
             </div>
           </div>

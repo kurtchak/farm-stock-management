@@ -29,8 +29,9 @@ export const useStockStore = defineStore('stock', {
           id: movement.id,
           name: cropName || 'Neznáma plodina',
           time: formatRelativeTime(movement.createdAt),
-          amount: `${movement.quantity} ${movement.unitOfMeasure}`,
-          type: movement.movementType.toLowerCase()
+          amount: `${Math.abs(movement.quantity)} ${movement.unitOfMeasure}`,
+          type: movement.movementType.toLowerCase(),
+          user: movement.userFullName || movement.userName
         }
       })
     }
@@ -82,7 +83,7 @@ export const useStockStore = defineStore('stock', {
     async fetchDashboardData() {
       await Promise.all([
         this.fetchStatistics(),
-        this.fetchRecentMovements(5)
+        this.fetchRecentMovements(3)
       ])
     },
 

@@ -1,6 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import authService from '../services/auth'
 
 const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/LoginView.vue'),
+    meta: { requiresAuth: false }
+  },
   {
     path: '/',
     name: 'Home',
@@ -50,12 +57,37 @@ const routes = [
     path: '/settings',
     name: 'settings',
     component: () => import('../views/SettingsView.vue')
+  },
+  {
+    path: '/history',
+    name: 'history',
+    component: () => import('../views/HistoryView.vue')
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = authService.isAuthenticated()
+
+  // If trying to access login page while authenticated, redirect to farm
+  if (to.path === '/login' && isAuthenticated) {
+    next('/farm')
+    return
+  }
+
+  // If trying to access protected route while not authenticated, redirect to login
+  if (to.path !== '/login' && !isAuthenticated) {
+    next('/login')
+    return
+  }
+
+  // Otherwise, allow navigation
+  next()
 })
 
 export default router

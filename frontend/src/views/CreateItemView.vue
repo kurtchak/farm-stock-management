@@ -214,6 +214,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Download, Printer } from 'lucide-vue-next'
 import VueQrcode from 'qrcode.vue'
+import { cropApi, stockApi } from '../services/api'
 
 const router = useRouter()
 const crops = ref([])
@@ -251,8 +252,8 @@ watch(selectedCropId, (newValue) => {
 
 onMounted(async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/crops`)
-    crops.value = await response.json()
+    const response = await cropApi.getAllCrops()
+    crops.value = response.data
   } catch (error) {
     console.error('Failed to fetch crops:', error)
   }
@@ -308,20 +309,8 @@ const submitForm = async () => {
       batchCode: generateBatchCode(cropName)
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stock`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(stockData)
-    })
-
-    if (!response.ok) {
-      const error = await response.text()
-      throw new Error('Failed to create stock: ' + error)
-    }
-
-    const stock = await response.json()
+    const response = await stockApi.createStock(stockData)
+    const stock = response.data
     createdItem.value = stock
     showQRModal.value = true
   } catch (error) {
@@ -415,17 +404,8 @@ const goBack = () => {
 
 const saveNewCrop = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/crops`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newCrop.value)
-    })
-
-    if (!response.ok) throw new Error('Failed to create crop')
-
-    const createdCrop = await response.json()
+    const response = await cropApi.createCrop(newCrop.value)
+    const createdCrop = response.data
     crops.value.push(createdCrop)
     selectedCropId.value = createdCrop.id
     isAddingNewCrop.value = false

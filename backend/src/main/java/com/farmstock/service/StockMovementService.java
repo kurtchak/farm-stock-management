@@ -72,6 +72,11 @@ public class StockMovementService {
             }
         }
 
+        if (movement.getUser() != null) {
+            dto.setUserName(movement.getUser().getUsername());
+            dto.setUserFullName(movement.getUser().getFullName());
+        }
+
         return dto;
     }
 }

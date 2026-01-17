@@ -19,4 +19,6 @@ public class StockMovementDTO {
     private String unitOfMeasure;
     private LocalDateTime createdAt;
     private String reason;
+    private String userName;
+    private String userFullName;
 }

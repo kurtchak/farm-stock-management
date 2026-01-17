@@ -14,13 +14,22 @@
             <span>🌱</span> Môj sklad
           </h1>
         </div>
-        <button
-            v-if="settingsEnabled"
-            @click="navigateToSettings"
-            class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 active:bg-gray-100 transition-colors"
-        >
-          <Settings class="w-5 h-5" />
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+              v-if="settingsEnabled"
+              @click="navigateToSettings"
+              class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 active:bg-gray-100 transition-colors"
+          >
+            <Settings class="w-5 h-5" />
+          </button>
+          <button
+              @click="handleLogout"
+              class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500 active:bg-red-100 transition-colors"
+              title="Odhlásiť sa"
+          >
+            <LogOut class="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -115,58 +124,33 @@
       </div>
 
       <!-- Tertiary Actions -->
-      <div v-if="deletedStocksCount > 0">
+      <div class="grid grid-cols-2 gap-3">
         <button
+            @click="navigateToHistory"
+            class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
+        >
+          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+            <Package class="w-5 h-5 text-blue-600" />
+          </div>
+          <div class="text-left">
+            <p class="text-sm font-bold text-gray-700">História</p>
+            <p class="text-[11px] text-gray-400">Všetky pohyby</p>
+          </div>
+        </button>
+
+        <button
+            v-if="deletedStocksCount > 0"
             @click="navigateToDeleted"
-            class="w-full bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
+            class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
         >
           <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
             <Archive class="w-5 h-5 text-orange-600" />
           </div>
           <div class="text-left">
-            <p class="text-sm font-bold text-gray-700">Archivované úrody</p>
+            <p class="text-sm font-bold text-gray-700">Archivované</p>
             <p class="text-[11px] text-gray-400">{{ deletedStocksCount }} {{ getDeletedItemsLabel(deletedStocksCount) }}</p>
           </div>
         </button>
-      </div>
-
-      <!-- Recent Activity -->
-      <div>
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledná aktivita</p>
-        <div class="bg-white rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
-          <div
-              v-for="item in recentActivity"
-              :key="item.id"
-              class="flex items-center p-4 gap-3"
-          >
-            <div
-                class="w-2 h-2 rounded-full"
-                :class="item.type === 'in' ? 'bg-green-500' : 'bg-amber-500'"
-            ></div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-700 truncate">{{ item.name }}</p>
-              <p class="text-[11px] text-gray-400">{{ item.time }}</p>
-            </div>
-            <p
-                class="text-sm font-bold"
-                :class="item.type === 'in' ? 'text-green-600' : 'text-amber-600'"
-            >
-              {{ item.type === 'in' ? '+' : '-' }}{{ item.amount }}
-            </p>
-          </div>
-
-          <button
-              v-if="recentActivity.length > 0"
-              @click="navigateToHistory"
-              class="w-full p-3 text-sm text-gray-500 font-medium active:bg-gray-50 transition-colors"
-          >
-            Zobraziť všetku históriu
-          </button>
-
-          <div v-if="recentActivity.length === 0" class="p-6 text-center">
-            <p class="text-sm text-gray-400">Zatiaľ žiadna aktivita</p>
-          </div>
-        </div>
       </div>
       </template>
     </div>
@@ -181,22 +165,24 @@ import {
   Package,
   Plus,
   Settings,
-  Archive
+  Archive,
+  LogOut
 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import { useStockStore } from '../stores/stock'
+import { useAuthStore } from '../stores/auth'
 import { stockApi } from '../services/api'
 import { features } from '../config/features'
 
 const router = useRouter()
 const stockStore = useStockStore()
+const authStore = useAuthStore()
 
 // Computed properties from store
 const totalItems = computed(() => stockStore.totalStockItems)
 const weeklyIn = computed(() => stockStore.weeklyInCount)
 const weeklyOut = computed(() => stockStore.weeklyOutCount)
-const recentActivity = computed(() => stockStore.formattedRecentMovements)
 const loading = computed(() => stockStore.loading)
 
 // Feature flags
@@ -252,6 +238,11 @@ const navigateToSettings = () => {
 
 const navigateToDeleted = () => {
   router.push('/deleted-stocks')
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  await router.push('/login')
 }
 
 // Slovak declension helper

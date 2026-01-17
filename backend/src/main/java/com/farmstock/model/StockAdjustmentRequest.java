@@ -9,5 +9,4 @@ public class StockAdjustmentRequest {
     private BigDecimal quantity;
     private String movementType;
     private String reason;
-    private Long userId;
 }

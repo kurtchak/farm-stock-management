@@ -7,10 +7,14 @@ import com.farmstock.model.Crop;
 import com.farmstock.model.Stock;
 import com.farmstock.model.StockAdjustmentRequest;
 import com.farmstock.model.StockMovement;
+import com.farmstock.model.User;
 import com.farmstock.repository.CropRepository;
 import com.farmstock.repository.StockRepository;
 import com.farmstock.repository.StockMovementRepository;
+import com.farmstock.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,14 +32,17 @@ public class StockService {
     private final CropRepository cropRepository;
     private final StockMovementRepository stockMovementRepository;
     private final StockProperties stockProperties;
+    private final UserService userService;
 
     @Autowired
     public StockService(StockRepository stockRepository, CropRepository cropRepository,
-                        StockMovementRepository stockMovementRepository, StockProperties stockProperties) {
+                        StockMovementRepository stockMovementRepository, StockProperties stockProperties,
+                        UserService userService) {
         this.stockRepository = stockRepository;
         this.cropRepository = cropRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.stockProperties = stockProperties;
+        this.userService = userService;
     }
 
     @Transactional
@@ -51,9 +58,18 @@ public class StockService {
         // Update quantity
         stock.setQuantity(stock.getQuantity().add(request.getQuantity()));
 
+        // Get authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User must be authenticated to adjust stock");
+        }
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userService.getUserById(userPrincipal.getId());
+
         // Create and save stock movement
         StockMovement movement = new StockMovement();
         movement.setStock(stock);
+        movement.setUser(user);
         movement.setQuantity(request.getQuantity());
         movement.setMovementType(request.getMovementType());
         movement.setReason(request.getReason());
