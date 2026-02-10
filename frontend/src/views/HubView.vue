@@ -1,9 +1,18 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] flex items-center justify-center p-6">
     <div class="w-full max-w-md">
-      <h1 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8">
-        Vitajte v Správe Podniku
-      </h1>
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
+          Vitajte v Správe Podniku
+        </h1>
+        <button
+          @click="handleLogout"
+          class="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center text-red-500 active:bg-red-50 transition-colors shadow-sm"
+          title="Odhlasiť sa"
+        >
+          <LogOut class="w-5 h-5" />
+        </button>
+      </div>
 
       <div class="flex flex-col gap-6">
         <!-- Zahrady Button -->
@@ -54,10 +63,12 @@
 </template>
 
 <script setup>
-import { Flower2, Wheat } from 'lucide-vue-next'
+import { Flower2, Wheat, LogOut } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const navigateToZahrady = () => {
   router.push('/gardens')
@@ -65,6 +76,11 @@ const navigateToZahrady = () => {
 
 const navigateToFarma = () => {
   router.push('/farm')
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  await router.push('/login')
 }
 
 </script>
