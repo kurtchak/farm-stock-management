@@ -32,35 +32,38 @@
       </div>
 
       <template v-else>
-        <!-- Summary Card -->
-        <div class="bg-gradient-to-br from-[#2d6a4f] to-[#40916c] rounded-2xl p-5 text-white relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full"></div>
-
-          <p class="text-green-200 text-sm">Celkom materiálu</p>
-          <p class="text-3xl font-extrabold mb-4">{{ statistics.totalItems }} {{ getItemsLabel(statistics.totalItems) }}</p>
-
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div class="bg-white/10 rounded-lg p-2">
-              <p class="text-green-200 text-[11px] uppercase tracking-wide">Stromy</p>
-              <p class="font-bold">{{ statistics.treeCount }}</p>
-            </div>
-            <div class="bg-white/10 rounded-lg p-2">
-              <p class="text-green-200 text-[11px] uppercase tracking-wide">Kolíky</p>
-              <p class="font-bold">{{ statistics.stakeCount }}</p>
-            </div>
-            <div class="bg-white/10 rounded-lg p-2">
-              <p class="text-green-200 text-[11px] uppercase tracking-wide">Ochrana</p>
-              <p class="font-bold">{{ statistics.protectionCount }}</p>
-            </div>
-            <div class="bg-white/10 rounded-lg p-2">
-              <p class="text-green-200 text-[11px] uppercase tracking-wide">Ostatné</p>
-              <p class="font-bold">{{ statistics.otherCount }}</p>
-            </div>
+        <!-- Posledné pohyby -->
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
+          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
+            Žiadne pohyby
           </div>
-
-          <div v-if="statistics.lowStockCount > 0" class="mt-3 bg-red-500/30 rounded-lg px-3 py-2 flex items-center gap-2">
-            <AlertTriangle class="w-4 h-4" />
-            <span class="text-sm font-medium">{{ statistics.lowStockCount }} {{ statistics.lowStockCount === 1 ? 'položka' : 'položiek' }} s nízkym stavom</span>
+          <div v-else class="space-y-2">
+            <div
+              v-for="movement in recentMovements"
+              :key="movement.id"
+              class="bg-white rounded-xl px-4 py-3 shadow-sm"
+            >
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-gray-800">{{ movement.gardenItem?.name || 'Neznáma položka' }}</p>
+                <span
+                  :class="movement.type === 'IN' ? 'text-green-600' : 'text-orange-500'"
+                  class="text-sm font-bold"
+                >
+                  {{ movement.type === 'IN' ? '+' : '-' }}{{ movement.quantity }} {{ movement.gardenItem?.unit || '' }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ categoryLabel(movement.gardenItem?.category) }}</span>
+                <span class="text-[11px] text-gray-400">{{ formatDateTime(movement.createdAt) }}</span>
+              </div>
+            </div>
+            <router-link
+              to="/gardens/history"
+              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
+            >
+              Zobraziť všetky →
+            </router-link>
           </div>
         </div>
 
@@ -218,7 +221,7 @@
 import { computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  ArrowLeft, Flower2, TreePine, LogOut, AlertTriangle,
+  ArrowLeft, Flower2, TreePine, LogOut,
   Package, Layers, Plus, History
 } from 'lucide-vue-next'
 import { useGardenStore } from '../stores/garden'
@@ -229,8 +232,8 @@ const gardenStore = useGardenStore()
 const authStore = useAuthStore()
 
 const loading = computed(() => gardenStore.loading)
-const statistics = computed(() => gardenStore.statistics)
 const activeSets = computed(() => gardenStore.activeSets)
+const recentMovements = computed(() => gardenStore.movements.slice(0, 4))
 
 const maxExecutions = (set) => gardenStore.maxExecutions(set)
 
@@ -276,9 +279,29 @@ const handleLogout = async () => {
   await router.push('/login')
 }
 
-const getItemsLabel = (count) => {
-  if (count === 1) return 'položka'
-  if (count >= 2 && count <= 4) return 'položky'
-  return 'položiek'
+const categoryLabel = (cat) => {
+  const labels = { TREE: 'Strom', STAKE: 'Kolík', PROTECTION: 'Ochrana', OTHER: 'Ostatné' }
+  return labels[cat] || cat
+}
+
+const formatDateTime = (dateTime) => {
+  const date = new Date(dateTime)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 60) {
+    return diffMins <= 1 ? 'Práve teraz' : `Pred ${diffMins} min`
+  } else if (diffHours < 24) {
+    return `Dnes, ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
+  } else if (diffDays === 1) {
+    return `Včera, ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
+  } else if (diffDays < 7) {
+    return `Pred ${diffDays} dňami, ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
+  } else {
+    return `${date.toLocaleDateString('sk-SK')} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
+  }
 }
 </script>

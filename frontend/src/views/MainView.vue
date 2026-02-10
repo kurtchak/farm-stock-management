@@ -42,25 +42,39 @@
 
       <!-- Content -->
       <template v-else>
-        <!-- Summary Card -->
-        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-5 text-white relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full"></div>
-          <div class="absolute bottom-3 right-4 text-4xl opacity-30">🌾</div>
-
-          <p class="text-green-100 text-sm">Celkom na sklade</p>
-          <p class="text-3xl font-extrabold mb-4">{{ totalItems }} {{ getItemsLabel(totalItems) }}</p>
-
-        <div class="flex gap-6">
-          <div>
-            <p class="text-[11px] text-green-200 uppercase tracking-wide">Tento týždeň</p>
-            <p class="text-base font-bold">{{ weeklyIn }} naskladnené</p>
+        <!-- Posledné pohyby -->
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
+          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
+            Žiadne pohyby
           </div>
-          <div>
-            <p class="text-[11px] text-green-200 uppercase tracking-wide">Predané</p>
-            <p class="text-base font-bold">{{ weeklyOut }} {{ getItemsLabel(weeklyOut) }}</p>
+          <div v-else class="space-y-2">
+            <div
+              v-for="movement in recentMovements"
+              :key="movement.id"
+              class="bg-white rounded-xl px-4 py-3 shadow-sm"
+            >
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-gray-800">{{ movement.name }}</p>
+                <span
+                  :class="movement.type === 'in' ? 'text-green-600' : 'text-orange-500'"
+                  class="text-sm font-bold"
+                >
+                  {{ movement.type === 'in' ? '+' : '-' }}{{ movement.amount }}
+                </span>
+              </div>
+              <div class="mt-1">
+                <span class="text-[11px] text-gray-400">{{ movement.time }}</span>
+              </div>
+            </div>
+            <router-link
+              to="/history"
+              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
+            >
+              Zobraziť všetky →
+            </router-link>
           </div>
         </div>
-      </div>
 
       <!-- Main Actions -->
       <div>
@@ -180,10 +194,8 @@ const stockStore = useStockStore()
 const authStore = useAuthStore()
 
 // Computed properties from store
-const totalItems = computed(() => stockStore.totalStockItems)
-const weeklyIn = computed(() => stockStore.weeklyInCount)
-const weeklyOut = computed(() => stockStore.weeklyOutCount)
 const loading = computed(() => stockStore.loading)
+const recentMovements = computed(() => stockStore.formattedRecentMovements)
 
 // Feature flags
 const settingsEnabled = features.settings.enabled
@@ -243,13 +255,6 @@ const navigateToDeleted = () => {
 const handleLogout = async () => {
   await authStore.logout()
   await router.push('/login')
-}
-
-// Slovak declension helper
-const getItemsLabel = (count) => {
-  if (count === 1) return 'položka'
-  if (count >= 2 && count <= 4) return 'položky'
-  return 'položiek'
 }
 
 const getDeletedItemsLabel = (count) => {

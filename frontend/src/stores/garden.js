@@ -87,16 +87,11 @@ export const useGardenStore = defineStore('garden', {
     },
 
     async fetchMovements() {
-      this.loading = true
-      this.error = null
       try {
         const response = await gardenApi.getMovements()
         this.movements = response.data
       } catch (error) {
-        this.error = error.message
         console.error('Error fetching garden movements:', error)
-      } finally {
-        this.loading = false
       }
     },
 
@@ -107,7 +102,8 @@ export const useGardenStore = defineStore('garden', {
         await Promise.all([
           this.fetchItems(),
           this.fetchActiveSets(),
-          this.fetchStatistics()
+          this.fetchStatistics(),
+          this.fetchMovements()
         ])
       } finally {
         this.loading = false
