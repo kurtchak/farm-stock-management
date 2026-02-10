@@ -42,40 +42,6 @@
 
       <!-- Content -->
       <template v-else>
-        <!-- Posledné pohyby -->
-        <div>
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
-          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
-            Žiadne pohyby
-          </div>
-          <div v-else class="space-y-2">
-            <div
-              v-for="movement in recentMovements"
-              :key="movement.id"
-              class="bg-white rounded-xl px-4 py-3 shadow-sm"
-            >
-              <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-gray-800">{{ movement.name }}</p>
-                <span
-                  :class="movement.type === 'in' ? 'text-green-600' : 'text-orange-500'"
-                  class="text-sm font-bold"
-                >
-                  {{ movement.type === 'in' ? '+' : '-' }}{{ movement.amount }}
-                </span>
-              </div>
-              <div class="mt-1">
-                <span class="text-[11px] text-gray-400">{{ movement.time }}</span>
-              </div>
-            </div>
-            <router-link
-              to="/history"
-              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
-            >
-              Zobraziť všetky →
-            </router-link>
-          </div>
-        </div>
-
       <!-- Main Actions -->
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Rýchle akcie</p>
@@ -140,19 +106,6 @@
       <!-- Tertiary Actions -->
       <div class="grid grid-cols-2 gap-3">
         <button
-            @click="navigateToHistory"
-            class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
-        >
-          <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Package class="w-5 h-5 text-blue-600" />
-          </div>
-          <div class="text-left">
-            <p class="text-sm font-bold text-gray-700">História</p>
-            <p class="text-[11px] text-gray-400">Všetky pohyby</p>
-          </div>
-        </button>
-
-        <button
             v-if="deletedStocksCount > 0"
             @click="navigateToDeleted"
             class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
@@ -166,6 +119,40 @@
           </div>
         </button>
       </div>
+
+        <!-- Posledné pohyby -->
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
+          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
+            Žiadne pohyby
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="movement in recentMovements"
+              :key="movement.id"
+              class="bg-white rounded-xl px-4 py-3 shadow-sm"
+            >
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-gray-800">{{ movement.name }}</p>
+                <span
+                  :class="movement.type === 'in' ? 'text-green-600' : 'text-orange-500'"
+                  class="text-sm font-bold"
+                >
+                  {{ movement.type === 'in' ? '+' : '-' }}{{ movement.amount }}
+                </span>
+              </div>
+              <div class="mt-1">
+                <span class="text-[11px] text-gray-400">{{ movement.time }}</span>
+              </div>
+            </div>
+            <router-link
+              to="/history"
+              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
+            >
+              Zobraziť všetky →
+            </router-link>
+          </div>
+        </div>
       </template>
     </div>
   </div>
@@ -238,10 +225,6 @@ const navigateToBrowser = () => {
 
 const navigateToCreate = () => {
   router.push('/create-item')
-}
-
-const navigateToHistory = () => {
-  router.push('/history')
 }
 
 const navigateToSettings = () => {

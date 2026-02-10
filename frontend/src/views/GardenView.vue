@@ -32,41 +32,6 @@
       </div>
 
       <template v-else>
-        <!-- Posledné pohyby -->
-        <div>
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
-          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
-            Žiadne pohyby
-          </div>
-          <div v-else class="space-y-2">
-            <div
-              v-for="movement in recentMovements"
-              :key="movement.id"
-              class="bg-white rounded-xl px-4 py-3 shadow-sm"
-            >
-              <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-gray-800">{{ movement.gardenItem?.name || 'Neznáma položka' }}</p>
-                <span
-                  :class="movement.type === 'IN' ? 'text-green-600' : 'text-orange-500'"
-                  class="text-sm font-bold"
-                >
-                  {{ movement.type === 'IN' ? '+' : '-' }}{{ movement.quantity }} {{ movement.gardenItem?.unit || '' }}
-                </span>
-              </div>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ categoryLabel(movement.gardenItem?.category) }}</span>
-                <span class="text-[11px] text-gray-400">{{ formatDateTime(movement.createdAt) }}</span>
-              </div>
-            </div>
-            <router-link
-              to="/gardens/history"
-              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
-            >
-              Zobraziť všetky →
-            </router-link>
-          </div>
-        </div>
-
         <!-- Planting Sets - Quick Actions (icon row) -->
         <div v-if="activeSets.length > 0">
           <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sadby - rýchle akcie</p>
@@ -140,18 +105,41 @@
               </div>
             </button>
 
-            <button
-              @click="router.push('/gardens/history')"
-              class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
+          </div>
+        </div>
+
+        <!-- Posledné pohyby -->
+        <div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Posledné pohyby</p>
+          <div v-if="recentMovements.length === 0" class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400 text-sm">
+            Žiadne pohyby
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="movement in recentMovements"
+              :key="movement.id"
+              class="bg-white rounded-xl px-4 py-3 shadow-sm"
             >
-              <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                <History class="w-5 h-5 text-purple-600" />
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-gray-800">{{ movement.gardenItem?.name || 'Neznáma položka' }}</p>
+                <span
+                  :class="movement.type === 'IN' ? 'text-green-600' : 'text-orange-500'"
+                  class="text-sm font-bold"
+                >
+                  {{ movement.type === 'IN' ? '+' : '-' }}{{ movement.quantity }} {{ movement.gardenItem?.unit || '' }}
+                </span>
               </div>
-              <div class="text-left">
-                <p class="text-sm font-bold text-gray-700">História</p>
-                <p class="text-[11px] text-gray-400">Všetky pohyby</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ categoryLabel(movement.gardenItem?.category) }}</span>
+                <span class="text-[11px] text-gray-400">{{ formatDateTime(movement.createdAt) }}</span>
               </div>
-            </button>
+            </div>
+            <router-link
+              to="/gardens/history"
+              class="block text-center text-sm text-green-700 font-medium py-2 active:text-green-900"
+            >
+              Zobraziť všetky →
+            </router-link>
           </div>
         </div>
       </template>
@@ -222,7 +210,7 @@ import { computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ArrowLeft, Flower2, TreePine, LogOut,
-  Package, Layers, Plus, History
+  Package, Layers, Plus
 } from 'lucide-vue-next'
 import { useGardenStore } from '../stores/garden'
 import { useAuthStore } from '../stores/auth'
