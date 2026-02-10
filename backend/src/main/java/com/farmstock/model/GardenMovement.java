@@ -8,15 +8,15 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "forest_movements")
-public class ForestMovement {
+@Table(name = "garden_movements")
+public class GardenMovement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "forest_item_id", nullable = false)
-    private ForestItem forestItem;
+    @JoinColumn(name = "garden_item_id", nullable = false)
+    private GardenItem gardenItem;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

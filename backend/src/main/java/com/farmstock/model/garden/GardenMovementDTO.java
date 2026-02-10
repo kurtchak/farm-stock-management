@@ -1,4 +1,4 @@
-package com.farmstock.model.forest;
+package com.farmstock.model.garden;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ForestMovementDTO {
+public class GardenMovementDTO {
     private Long id;
     private String itemName;
     private String itemCategory;

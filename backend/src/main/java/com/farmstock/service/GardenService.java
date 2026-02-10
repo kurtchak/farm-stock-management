@@ -2,9 +2,9 @@ package com.farmstock.service;
 
 import com.farmstock.exception.ResourceNotFoundException;
 import com.farmstock.model.*;
-import com.farmstock.model.forest.*;
-import com.farmstock.repository.ForestItemRepository;
-import com.farmstock.repository.ForestMovementRepository;
+import com.farmstock.model.garden.*;
+import com.farmstock.repository.GardenItemRepository;
+import com.farmstock.repository.GardenMovementRepository;
 import com.farmstock.repository.PlantingSetRepository;
 import com.farmstock.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,55 +20,55 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-public class ForestService {
+public class GardenService {
 
-    private final ForestItemRepository forestItemRepository;
+    private final GardenItemRepository gardenItemRepository;
     private final PlantingSetRepository plantingSetRepository;
-    private final ForestMovementRepository forestMovementRepository;
+    private final GardenMovementRepository gardenMovementRepository;
     private final UserService userService;
 
     @Autowired
-    public ForestService(ForestItemRepository forestItemRepository,
+    public GardenService(GardenItemRepository gardenItemRepository,
                          PlantingSetRepository plantingSetRepository,
-                         ForestMovementRepository forestMovementRepository,
+                         GardenMovementRepository gardenMovementRepository,
                          UserService userService) {
-        this.forestItemRepository = forestItemRepository;
+        this.gardenItemRepository = gardenItemRepository;
         this.plantingSetRepository = plantingSetRepository;
-        this.forestMovementRepository = forestMovementRepository;
+        this.gardenMovementRepository = gardenMovementRepository;
         this.userService = userService;
     }
 
-    // ---- Forest Items ----
+    // ---- Garden Items ----
 
-    public List<ForestItem> getAllItems() {
-        return forestItemRepository.findAllActive();
+    public List<GardenItem> getAllItems() {
+        return gardenItemRepository.findAllActive();
     }
 
-    public List<ForestItem> getItemsByCategory(String category) {
-        return forestItemRepository.findActiveByCategory(category);
+    public List<GardenItem> getItemsByCategory(String category) {
+        return gardenItemRepository.findActiveByCategory(category);
     }
 
-    public ForestItem getItem(Long id) {
-        return forestItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Forest item not found"));
+    public GardenItem getItem(Long id) {
+        return gardenItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Garden item not found"));
     }
 
     @Transactional
-    public ForestItem createItem(CreateForestItemRequest request) {
-        ForestItem item = new ForestItem();
+    public GardenItem createItem(CreateGardenItemRequest request) {
+        GardenItem item = new GardenItem();
         item.setName(request.getName());
         item.setCategory(request.getCategory());
         item.setQuantity(request.getQuantity() != null ? request.getQuantity() : BigDecimal.ZERO);
         item.setUnit(request.getUnit() != null ? request.getUnit() : "ks");
         item.setMinStock(request.getMinStock() != null ? request.getMinStock() : BigDecimal.ZERO);
         item.setNotes(request.getNotes());
-        return forestItemRepository.save(item);
+        return gardenItemRepository.save(item);
     }
 
     @Transactional
-    public ForestItem updateItem(Long id, UpdateForestItemRequest request) {
-        ForestItem item = forestItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Forest item not found"));
+    public GardenItem updateItem(Long id, UpdateGardenItemRequest request) {
+        GardenItem item = gardenItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Garden item not found"));
 
         if (request.getName() != null) item.setName(request.getName());
         if (request.getCategory() != null) item.setCategory(request.getCategory());
@@ -76,21 +76,21 @@ public class ForestService {
         if (request.getMinStock() != null) item.setMinStock(request.getMinStock());
         if (request.getNotes() != null) item.setNotes(request.getNotes());
 
-        return forestItemRepository.save(item);
+        return gardenItemRepository.save(item);
     }
 
     @Transactional
     public void deleteItem(Long id) {
-        ForestItem item = forestItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Forest item not found"));
+        GardenItem item = gardenItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Garden item not found"));
         item.setDeleted(true);
-        forestItemRepository.save(item);
+        gardenItemRepository.save(item);
     }
 
     @Transactional
-    public ForestItem adjustItem(Long id, ForestAdjustmentRequest request) {
-        ForestItem item = forestItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Forest item not found"));
+    public GardenItem adjustItem(Long id, GardenAdjustmentRequest request) {
+        GardenItem item = gardenItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Garden item not found"));
 
         BigDecimal adjustQty = request.getQuantity();
         if ("OUT".equals(request.getMovementType())) {
@@ -105,15 +105,15 @@ public class ForestService {
 
         User user = getAuthenticatedUser();
 
-        ForestMovement movement = new ForestMovement();
-        movement.setForestItem(item);
+        GardenMovement movement = new GardenMovement();
+        movement.setGardenItem(item);
         movement.setUser(user);
         movement.setQuantity(request.getQuantity());
         movement.setMovementType(request.getMovementType());
         movement.setReason(request.getReason());
-        forestMovementRepository.save(movement);
+        gardenMovementRepository.save(movement);
 
-        return forestItemRepository.save(item);
+        return gardenItemRepository.save(item);
     }
 
     // ---- Planting Sets ----
@@ -140,11 +140,11 @@ public class ForestService {
 
         if (request.getItems() != null) {
             for (PlantingSetItemRequest itemReq : request.getItems()) {
-                ForestItem forestItem = forestItemRepository.findById(itemReq.getForestItemId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Forest item not found: " + itemReq.getForestItemId()));
+                GardenItem gardenItem = gardenItemRepository.findById(itemReq.getGardenItemId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Garden item not found: " + itemReq.getGardenItemId()));
 
                 PlantingSetItem setItem = new PlantingSetItem();
-                setItem.setForestItem(forestItem);
+                setItem.setGardenItem(gardenItem);
                 setItem.setQuantity(itemReq.getQuantity());
                 set.addItem(setItem);
             }
@@ -166,11 +166,11 @@ public class ForestService {
 
         if (request.getItems() != null) {
             for (PlantingSetItemRequest itemReq : request.getItems()) {
-                ForestItem forestItem = forestItemRepository.findById(itemReq.getForestItemId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Forest item not found: " + itemReq.getForestItemId()));
+                GardenItem gardenItem = gardenItemRepository.findById(itemReq.getGardenItemId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Garden item not found: " + itemReq.getGardenItemId()));
 
                 PlantingSetItem setItem = new PlantingSetItem();
-                setItem.setForestItem(forestItem);
+                setItem.setGardenItem(gardenItem);
                 setItem.setQuantity(itemReq.getQuantity());
                 set.addItem(setItem);
             }
@@ -193,15 +193,15 @@ public class ForestService {
 
         // Validate all components have sufficient stock
         for (PlantingSetItem setItem : set.getItems()) {
-            ForestItem forestItem = forestItemRepository.findById(setItem.getForestItem().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Forest item not found"));
+            GardenItem gardenItem = gardenItemRepository.findById(setItem.getGardenItem().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Garden item not found"));
 
             BigDecimal required = setItem.getQuantity().multiply(BigDecimal.valueOf(count));
-            if (forestItem.getQuantity().compareTo(required) < 0) {
+            if (gardenItem.getQuantity().compareTo(required) < 0) {
                 throw new IllegalArgumentException(
-                        "Nedostatok materiálu: " + forestItem.getName() +
-                        " (potrebné: " + required + " " + forestItem.getUnit() +
-                        ", dostupné: " + forestItem.getQuantity() + " " + forestItem.getUnit() + ")");
+                        "Nedostatok materiálu: " + gardenItem.getName() +
+                        " (potrebné: " + required + " " + gardenItem.getUnit() +
+                        ", dostupné: " + gardenItem.getQuantity() + " " + gardenItem.getUnit() + ")");
             }
         }
 
@@ -209,60 +209,60 @@ public class ForestService {
 
         // Deduct all quantities and record movements
         for (PlantingSetItem setItem : set.getItems()) {
-            ForestItem forestItem = forestItemRepository.findById(setItem.getForestItem().getId()).get();
+            GardenItem gardenItem = gardenItemRepository.findById(setItem.getGardenItem().getId()).get();
             BigDecimal deduction = setItem.getQuantity().multiply(BigDecimal.valueOf(count));
 
-            forestItem.setQuantity(forestItem.getQuantity().subtract(deduction));
-            forestItemRepository.save(forestItem);
+            gardenItem.setQuantity(gardenItem.getQuantity().subtract(deduction));
+            gardenItemRepository.save(gardenItem);
 
-            ForestMovement movement = new ForestMovement();
-            movement.setForestItem(forestItem);
+            GardenMovement movement = new GardenMovement();
+            movement.setGardenItem(gardenItem);
             movement.setUser(user);
             movement.setQuantity(deduction);
             movement.setMovementType("OUT");
             movement.setReason("Výsadba: " + set.getName() + " (x" + count + ")");
             movement.setPlantingSet(set);
-            forestMovementRepository.save(movement);
+            gardenMovementRepository.save(movement);
         }
     }
 
     // ---- Statistics ----
 
-    public ForestStatistics getStatistics() {
-        long totalItems = forestItemRepository.countActive();
-        long treeCount = forestItemRepository.countActiveByCategory("TREE");
-        long stakeCount = forestItemRepository.countActiveByCategory("STAKE");
-        long protectionCount = forestItemRepository.countActiveByCategory("PROTECTION");
-        long otherCount = forestItemRepository.countActiveByCategory("OTHER");
-        long lowStockCount = forestItemRepository.findLowStock().size();
+    public GardenStatistics getStatistics() {
+        long totalItems = gardenItemRepository.countActive();
+        long treeCount = gardenItemRepository.countActiveByCategory("TREE");
+        long stakeCount = gardenItemRepository.countActiveByCategory("STAKE");
+        long protectionCount = gardenItemRepository.countActiveByCategory("PROTECTION");
+        long otherCount = gardenItemRepository.countActiveByCategory("OTHER");
+        long lowStockCount = gardenItemRepository.findLowStock().size();
 
         LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
-        long weeklyIn = forestMovementRepository.countByCreatedAtAfterAndMovementType(weekAgo, "IN");
-        long weeklyOut = forestMovementRepository.countByCreatedAtAfterAndMovementType(weekAgo, "OUT");
+        long weeklyIn = gardenMovementRepository.countByCreatedAtAfterAndMovementType(weekAgo, "IN");
+        long weeklyOut = gardenMovementRepository.countByCreatedAtAfterAndMovementType(weekAgo, "OUT");
 
-        return new ForestStatistics(totalItems, treeCount, stakeCount, protectionCount, otherCount, lowStockCount, weeklyIn, weeklyOut);
+        return new GardenStatistics(totalItems, treeCount, stakeCount, protectionCount, otherCount, lowStockCount, weeklyIn, weeklyOut);
     }
 
     // ---- Movements ----
 
-    public List<ForestMovementDTO> getMovements() {
-        return forestMovementRepository.findAllOrderByCreatedAtDesc().stream()
+    public List<GardenMovementDTO> getMovements() {
+        return gardenMovementRepository.findAllOrderByCreatedAtDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    private ForestMovementDTO convertToDTO(ForestMovement movement) {
-        ForestMovementDTO dto = new ForestMovementDTO();
+    private GardenMovementDTO convertToDTO(GardenMovement movement) {
+        GardenMovementDTO dto = new GardenMovementDTO();
         dto.setId(movement.getId());
         dto.setMovementType(movement.getMovementType());
         dto.setQuantity(movement.getQuantity());
         dto.setCreatedAt(movement.getCreatedAt());
         dto.setReason(movement.getReason());
 
-        if (movement.getForestItem() != null) {
-            dto.setItemName(movement.getForestItem().getName());
-            dto.setItemCategory(movement.getForestItem().getCategory());
-            dto.setUnit(movement.getForestItem().getUnit());
+        if (movement.getGardenItem() != null) {
+            dto.setItemName(movement.getGardenItem().getName());
+            dto.setItemCategory(movement.getGardenItem().getCategory());
+            dto.setUnit(movement.getGardenItem().getUnit());
         }
 
         if (movement.getUser() != null) {

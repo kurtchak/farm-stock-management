@@ -21,7 +21,7 @@ const routes = [
   {
     path: '/gardens',
     name: 'Gardens',
-    component: () => import('../views/ZahradyView.vue')
+    component: () => import('../views/GardenView.vue')
   },
   {
     path: '/test-qr',
@@ -64,44 +64,39 @@ const routes = [
     component: () => import('../views/HistoryView.vue')
   },
   {
-    path: '/forest',
-    name: 'Forest',
-    component: () => import('../views/ForestView.vue')
+    path: '/gardens/items',
+    name: 'GardenItems',
+    component: () => import('../views/GardenItemsView.vue')
   },
   {
-    path: '/forest/items',
-    name: 'ForestItems',
-    component: () => import('../views/ForestItemsView.vue')
+    path: '/gardens/items/create',
+    name: 'GardenItemCreate',
+    component: () => import('../views/GardenItemCreateView.vue')
   },
   {
-    path: '/forest/items/create',
-    name: 'ForestItemCreate',
-    component: () => import('../views/ForestItemCreateView.vue')
+    path: '/gardens/items/:id/adjust',
+    name: 'GardenItemAdjust',
+    component: () => import('../views/GardenItemAdjustView.vue')
   },
   {
-    path: '/forest/items/:id/adjust',
-    name: 'ForestItemAdjust',
-    component: () => import('../views/ForestItemAdjustView.vue')
+    path: '/gardens/sets',
+    name: 'GardenSets',
+    component: () => import('../views/GardenSetsView.vue')
   },
   {
-    path: '/forest/sets',
-    name: 'ForestSets',
-    component: () => import('../views/ForestSetsView.vue')
+    path: '/gardens/sets/new',
+    name: 'GardenSetCreate',
+    component: () => import('../views/GardenSetFormView.vue')
   },
   {
-    path: '/forest/sets/new',
-    name: 'ForestSetCreate',
-    component: () => import('../views/ForestSetFormView.vue')
+    path: '/gardens/sets/:id/edit',
+    name: 'GardenSetEdit',
+    component: () => import('../views/GardenSetFormView.vue')
   },
   {
-    path: '/forest/sets/:id/edit',
-    name: 'ForestSetEdit',
-    component: () => import('../views/ForestSetFormView.vue')
-  },
-  {
-    path: '/forest/history',
-    name: 'ForestHistory',
-    component: () => import('../views/ForestHistoryView.vue')
+    path: '/gardens/history',
+    name: 'GardenHistory',
+    component: () => import('../views/GardenHistoryView.vue')
   }
 ]
 

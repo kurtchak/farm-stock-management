@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { forestApi } from '../services/api'
+import { gardenApi } from '../services/api'
 
-export const useForestStore = defineStore('forest', {
+export const useGardenStore = defineStore('garden', {
   state: () => ({
     items: [],
     sets: [],
@@ -27,8 +27,8 @@ export const useForestStore = defineStore('forest', {
         if (!set.items || set.items.length === 0) return 0
         let min = Infinity
         for (const setItem of set.items) {
-          const forestItem = state.items.find(i => i.id === setItem.forestItem.id)
-          const available = forestItem ? forestItem.quantity : setItem.forestItem.quantity
+          const gardenItem = state.items.find(i => i.id === setItem.gardenItem.id)
+          const available = gardenItem ? gardenItem.quantity : setItem.gardenItem.quantity
           const perExec = setItem.quantity
           if (perExec > 0) {
             min = Math.min(min, Math.floor(available / perExec))
@@ -44,11 +44,11 @@ export const useForestStore = defineStore('forest', {
       this.loading = true
       this.error = null
       try {
-        const response = await forestApi.getAllItems(category)
+        const response = await gardenApi.getAllItems(category)
         this.items = response.data
       } catch (error) {
         this.error = error.message
-        console.error('Error fetching forest items:', error)
+        console.error('Error fetching garden items:', error)
       } finally {
         this.loading = false
       }
@@ -58,7 +58,7 @@ export const useForestStore = defineStore('forest', {
       this.loading = true
       this.error = null
       try {
-        const response = await forestApi.getAllSets()
+        const response = await gardenApi.getAllSets()
         this.sets = response.data
       } catch (error) {
         this.error = error.message
@@ -70,7 +70,7 @@ export const useForestStore = defineStore('forest', {
 
     async fetchActiveSets() {
       try {
-        const response = await forestApi.getActiveSets()
+        const response = await gardenApi.getActiveSets()
         this.activeSets = response.data
       } catch (error) {
         console.error('Error fetching active sets:', error)
@@ -79,10 +79,10 @@ export const useForestStore = defineStore('forest', {
 
     async fetchStatistics() {
       try {
-        const response = await forestApi.getStatistics()
+        const response = await gardenApi.getStatistics()
         this.statistics = response.data
       } catch (error) {
-        console.error('Error fetching forest statistics:', error)
+        console.error('Error fetching garden statistics:', error)
       }
     },
 
@@ -90,11 +90,11 @@ export const useForestStore = defineStore('forest', {
       this.loading = true
       this.error = null
       try {
-        const response = await forestApi.getMovements()
+        const response = await gardenApi.getMovements()
         this.movements = response.data
       } catch (error) {
         this.error = error.message
-        console.error('Error fetching forest movements:', error)
+        console.error('Error fetching garden movements:', error)
       } finally {
         this.loading = false
       }
@@ -115,7 +115,7 @@ export const useForestStore = defineStore('forest', {
     },
 
     async executeSet(setId, count) {
-      await forestApi.executeSet(setId, count)
+      await gardenApi.executeSet(setId, count)
       await this.fetchDashboardData()
     }
   }

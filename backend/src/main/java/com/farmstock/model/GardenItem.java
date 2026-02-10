@@ -14,9 +14,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "forest_items")
+@Table(name = "garden_items")
 @Data
-public class ForestItem {
+public class GardenItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

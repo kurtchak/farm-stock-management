@@ -22,9 +22,9 @@ public class PlantingSetItem {
     private PlantingSet plantingSet;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "forest_item_id", nullable = false)
+    @JoinColumn(name = "garden_item_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private ForestItem forestItem;
+    private GardenItem gardenItem;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantity;

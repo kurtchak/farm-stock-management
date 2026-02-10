@@ -11,7 +11,7 @@
             <ArrowLeft class="w-5 h-5" />
           </button>
           <h1 class="text-xl font-bold text-gray-800 ml-1 flex items-center gap-2">
-            <TreePine class="w-5 h-5 text-green-700" /> Les
+            <Flower2 class="w-5 h-5 text-green-700" /> Záhrada
           </h1>
         </div>
         <button
@@ -64,37 +64,33 @@
           </div>
         </div>
 
-        <!-- Planting Sets - Quick Actions -->
+        <!-- Planting Sets - Quick Actions (icon row) -->
         <div v-if="activeSets.length > 0">
           <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sadby - rýchle akcie</p>
-          <div class="space-y-3">
-            <div
+          <div class="flex gap-4 overflow-x-auto pb-2">
+            <button
               v-for="set in activeSets"
               :key="set.id"
-              class="bg-white rounded-2xl shadow-sm p-4"
+              @click="openExecuteModal(set)"
+              :disabled="maxExecutions(set) === 0"
+              class="flex flex-col items-center gap-1.5 min-w-[64px] disabled:opacity-40"
             >
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: set.color }"></div>
-                  <h3 class="font-bold text-gray-800">{{ set.name }}</h3>
+              <div class="relative">
+                <div
+                  class="w-14 h-14 rounded-full flex items-center justify-center shadow-md"
+                  :style="{ backgroundColor: set.color }"
+                >
+                  <TreePine class="w-7 h-7 text-white" />
                 </div>
-                <span class="text-xs text-gray-400">max {{ maxExecutions(set) }}x</span>
-              </div>
-
-              <div class="text-xs text-gray-500 mb-3">
-                <span v-for="(item, idx) in set.items" :key="item.id">
-                  {{ item.forestItem.name }} ({{ item.quantity }} {{ item.forestItem.unit }}){{ idx < set.items.length - 1 ? ', ' : '' }}
+                <span
+                  v-if="maxExecutions(set) > 0"
+                  class="absolute -top-1 -right-1 bg-white text-gray-800 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow border border-gray-200"
+                >
+                  {{ maxExecutions(set) }}
                 </span>
               </div>
-
-              <button
-                @click="openExecuteModal(set)"
-                :disabled="maxExecutions(set) === 0"
-                class="w-full bg-[#2d6a4f] text-white py-2.5 rounded-xl font-semibold active:bg-[#40916c] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Vysadiť
-              </button>
-            </div>
+              <span class="text-[11px] font-medium text-gray-700 text-center leading-tight max-w-[72px] truncate">{{ set.name }}</span>
+            </button>
           </div>
         </div>
 
@@ -103,7 +99,7 @@
           <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Správa</p>
           <div class="grid grid-cols-2 gap-3">
             <button
-              @click="router.push('/forest/items')"
+              @click="router.push('/gardens/items')"
               class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
             >
               <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
@@ -116,7 +112,7 @@
             </button>
 
             <button
-              @click="router.push('/forest/sets')"
+              @click="router.push('/gardens/sets')"
               class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
             >
               <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
@@ -129,7 +125,7 @@
             </button>
 
             <button
-              @click="router.push('/forest/items/create')"
+              @click="router.push('/gardens/items/create')"
               class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
             >
               <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -142,7 +138,7 @@
             </button>
 
             <button
-              @click="router.push('/forest/history')"
+              @click="router.push('/gardens/history')"
               class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-all"
             >
               <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
@@ -190,8 +186,8 @@
         <div class="bg-gray-50 rounded-xl p-3 mb-4">
           <p class="text-xs font-bold text-gray-400 uppercase mb-2">Spotreba materiálu</p>
           <div v-for="item in executeModal.set?.items" :key="item.id" class="flex justify-between text-sm py-1">
-            <span class="text-gray-600">{{ item.forestItem.name }}</span>
-            <span class="font-medium text-gray-800">-{{ (item.quantity * executeModal.count).toFixed(0) }} {{ item.forestItem.unit }}</span>
+            <span class="text-gray-600">{{ item.gardenItem.name }}</span>
+            <span class="font-medium text-gray-800">-{{ (item.quantity * executeModal.count).toFixed(0) }} {{ item.gardenItem.unit }}</span>
           </div>
         </div>
 
@@ -222,21 +218,21 @@
 import { computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  ArrowLeft, TreePine, LogOut, AlertTriangle,
+  ArrowLeft, Flower2, TreePine, LogOut, AlertTriangle,
   Package, Layers, Plus, History
 } from 'lucide-vue-next'
-import { useForestStore } from '../stores/forest'
+import { useGardenStore } from '../stores/garden'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
-const forestStore = useForestStore()
+const gardenStore = useGardenStore()
 const authStore = useAuthStore()
 
-const loading = computed(() => forestStore.loading)
-const statistics = computed(() => forestStore.statistics)
-const activeSets = computed(() => forestStore.activeSets)
+const loading = computed(() => gardenStore.loading)
+const statistics = computed(() => gardenStore.statistics)
+const activeSets = computed(() => gardenStore.activeSets)
 
-const maxExecutions = (set) => forestStore.maxExecutions(set)
+const maxExecutions = (set) => gardenStore.maxExecutions(set)
 
 const executeModal = reactive({
   show: false,
@@ -247,7 +243,7 @@ const executeModal = reactive({
 })
 
 onMounted(async () => {
-  await forestStore.fetchDashboardData()
+  await gardenStore.fetchDashboardData()
 })
 
 const openExecuteModal = (set) => {
@@ -262,7 +258,7 @@ const confirmExecute = async () => {
   executeModal.loading = true
   executeModal.error = null
   try {
-    await forestStore.executeSet(executeModal.set.id, executeModal.count)
+    await gardenStore.executeSet(executeModal.set.id, executeModal.count)
     executeModal.show = false
   } catch (error) {
     executeModal.error = error.response?.data?.message || error.message || 'Chyba pri výsadbe'

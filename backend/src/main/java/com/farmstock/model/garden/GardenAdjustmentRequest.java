@@ -1,11 +1,11 @@
-package com.farmstock.model.forest;
+package com.farmstock.model.garden;
 
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
-public class ForestAdjustmentRequest {
+public class GardenAdjustmentRequest {
     private BigDecimal quantity;
     private String movementType;
     private String reason;

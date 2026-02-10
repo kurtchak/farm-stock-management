@@ -74,7 +74,7 @@
 
           <div v-for="(comp, idx) in form.items" :key="idx" class="flex gap-2 mb-2 items-center">
             <select
-              v-model="comp.forestItemId"
+              v-model="comp.gardenItemId"
               required
               class="flex-1 p-2 border rounded-md text-sm"
             >
@@ -124,7 +124,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft, Plus, X } from 'lucide-vue-next'
-import { forestApi } from '../services/api'
+import { gardenApi } from '../services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -148,7 +148,7 @@ const form = ref({
 })
 
 const addComponent = () => {
-  form.value.items.push({ forestItemId: '', quantity: 1 })
+  form.value.items.push({ gardenItemId: '', quantity: 1 })
 }
 
 const removeComponent = (idx) => {
@@ -157,17 +157,17 @@ const removeComponent = (idx) => {
 
 onMounted(async () => {
   try {
-    const itemsResp = await forestApi.getAllItems()
+    const itemsResp = await gardenApi.getAllItems()
     availableItems.value = itemsResp.data
 
     if (isEdit.value) {
-      const setResp = await forestApi.getSet(route.params.id)
+      const setResp = await gardenApi.getSet(route.params.id)
       const set = setResp.data
       form.value.name = set.name
       form.value.description = set.description || ''
       form.value.color = set.color
       form.value.items = set.items.map(i => ({
-        forestItemId: i.forestItem.id,
+        gardenItemId: i.gardenItem.id,
         quantity: i.quantity
       }))
     }
@@ -186,17 +186,17 @@ const submitForm = async () => {
       description: form.value.description || null,
       color: form.value.color,
       items: form.value.items.map(i => ({
-        forestItemId: parseInt(i.forestItemId),
+        gardenItemId: parseInt(i.gardenItemId),
         quantity: parseFloat(i.quantity)
       }))
     }
 
     if (isEdit.value) {
-      await forestApi.updateSet(route.params.id, payload)
+      await gardenApi.updateSet(route.params.id, payload)
     } else {
-      await forestApi.createSet(payload)
+      await gardenApi.createSet(payload)
     }
-    router.push('/forest/sets')
+    router.push('/gardens/sets')
   } catch (error) {
     console.error('Failed to save set:', error)
     alert('Nepodarilo sa uložiť zostavu: ' + (error.response?.data?.message || error.message))

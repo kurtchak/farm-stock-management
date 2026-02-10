@@ -1,4 +1,4 @@
-package com.farmstock.model.forest;
+package com.farmstock.model.garden;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ForestStatistics {
+public class GardenStatistics {
     private long totalItems;
     private long treeCount;
     private long stakeCount;

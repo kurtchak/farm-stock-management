@@ -86,14 +86,14 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, History } from 'lucide-vue-next'
-import { useForestStore } from '../stores/forest'
+import { useGardenStore } from '../stores/garden'
 
 const router = useRouter()
-const forestStore = useForestStore()
+const gardenStore = useGardenStore()
 
-const loading = computed(() => forestStore.loading)
-const error = computed(() => forestStore.error)
-const movements = computed(() => forestStore.movements)
+const loading = computed(() => gardenStore.loading)
+const error = computed(() => gardenStore.error)
+const movements = computed(() => gardenStore.movements)
 
 const categoryLabel = (cat) => {
   const labels = { TREE: 'Strom', STAKE: 'Kolík', PROTECTION: 'Ochrana', OTHER: 'Ostatné' }
@@ -122,7 +122,7 @@ const formatDateTime = (dateTime) => {
 }
 
 onMounted(async () => {
-  await forestStore.fetchMovements()
+  await gardenStore.fetchMovements()
 })
 
 const goBack = () => {

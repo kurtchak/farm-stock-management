@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public interface PlantingSetRepository extends JpaRepository<PlantingSet, Long> {
 
-    @Query("SELECT DISTINCT s FROM PlantingSet s LEFT JOIN FETCH s.items i LEFT JOIN FETCH i.forestItem WHERE s.active = true ORDER BY s.name")
+    @Query("SELECT DISTINCT s FROM PlantingSet s LEFT JOIN FETCH s.items i LEFT JOIN FETCH i.gardenItem WHERE s.active = true ORDER BY s.name")
     List<PlantingSet> findAllActiveWithItems();
 
-    @Query("SELECT DISTINCT s FROM PlantingSet s LEFT JOIN FETCH s.items i LEFT JOIN FETCH i.forestItem ORDER BY s.name")
+    @Query("SELECT DISTINCT s FROM PlantingSet s LEFT JOIN FETCH s.items i LEFT JOIN FETCH i.gardenItem ORDER BY s.name")
     List<PlantingSet> findAllWithItems();
 }

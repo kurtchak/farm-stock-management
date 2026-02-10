@@ -62,7 +62,7 @@
                 <span class="text-xs font-medium">Nízky stav</span>
               </div>
               <button
-                @click.stop="router.push(`/forest/items/${item.id}/adjust`)"
+                @click.stop="router.push(`/gardens/items/${item.id}/adjust`)"
                 class="w-9 h-9 rounded-lg bg-[#2d6a4f] flex items-center justify-center text-white active:bg-[#40916c]"
               >
                 <ArrowUpDown class="w-4 h-4" />
@@ -77,7 +77,7 @@
         <TreePine class="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p class="text-gray-500">Žiadny materiál</p>
         <button
-          @click="router.push('/forest/items/create')"
+          @click="router.push('/gardens/items/create')"
           class="mt-4 text-[#2d6a4f] font-medium"
         >
           Pridať prvý materiál
@@ -116,7 +116,7 @@
 
         <div class="flex gap-2 mt-5">
           <button
-            @click="detailItem = null; router.push(`/forest/items/${detailItem.id}/adjust`)"
+            @click="detailItem = null; router.push(`/gardens/items/${detailItem.id}/adjust`)"
             class="flex-1 bg-[#2d6a4f] text-white py-2.5 rounded-xl font-medium"
           >
             Upraviť stav
@@ -133,7 +133,7 @@
 
     <!-- FAB -->
     <button
-      @click="router.push('/forest/items/create')"
+      @click="router.push('/gardens/items/create')"
       class="fixed bottom-6 right-6 w-14 h-14 bg-[#2d6a4f] rounded-full shadow-lg flex items-center justify-center text-white active:bg-[#40916c] transition-colors z-40"
     >
       <Plus class="w-7 h-7" />
@@ -145,11 +145,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, AlertTriangle, ArrowUpDown, TreePine, Plus, X, Trash2 } from 'lucide-vue-next'
-import { useForestStore } from '../stores/forest'
-import { forestApi } from '../services/api'
+import { useGardenStore } from '../stores/garden'
+import { gardenApi } from '../services/api'
 
 const router = useRouter()
-const forestStore = useForestStore()
+const gardenStore = useGardenStore()
 
 const activeTab = ref(null)
 const detailItem = ref(null)
@@ -162,10 +162,10 @@ const tabs = [
   { label: 'Ostatné', value: 'OTHER' }
 ]
 
-const loading = computed(() => forestStore.loading)
+const loading = computed(() => gardenStore.loading)
 const filteredItems = computed(() => {
-  if (!activeTab.value) return forestStore.items
-  return forestStore.items.filter(i => i.category === activeTab.value)
+  if (!activeTab.value) return gardenStore.items
+  return gardenStore.items.filter(i => i.category === activeTab.value)
 })
 
 const isLowStock = (item) => item.quantity <= item.minStock && item.minStock > 0
@@ -192,16 +192,16 @@ const openDetail = (item) => {
 const handleDelete = async (id) => {
   if (!confirm('Naozaj chcete odstrániť túto položku?')) return
   try {
-    await forestApi.deleteItem(id)
+    await gardenApi.deleteItem(id)
     detailItem.value = null
-    await forestStore.fetchItems()
+    await gardenStore.fetchItems()
   } catch (error) {
     alert('Nepodarilo sa odstrániť položku')
   }
 }
 
 onMounted(async () => {
-  await forestStore.fetchItems()
+  await gardenStore.fetchItems()
 })
 
 const goBack = () => {

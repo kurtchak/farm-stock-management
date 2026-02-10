@@ -48,33 +48,13 @@
           </div>
         </button>
 
-        <!-- Les Button -->
-        <button
-          @click="navigateToForest"
-          class="group relative overflow-hidden bg-white rounded-2xl shadow-xl
-                 active:scale-95 transition-all duration-300
-                 p-8 flex flex-col items-center justify-center min-h-[200px]"
-        >
-          <div class="absolute inset-0 bg-gradient-to-br from-[#2d6a4f] to-[#40916c]
-                      opacity-10 group-active:opacity-20 transition-opacity duration-300"></div>
-
-          <div class="relative z-10 flex flex-col items-center">
-            <div class="w-20 h-20 mb-4 bg-[#2d6a4f] rounded-full flex items-center justify-center
-                        group-active:bg-[#40916c] transition-colors duration-300 shadow-lg">
-              <TreePine class="w-10 h-10 text-white" />
-            </div>
-
-            <h2 class="text-2xl font-bold text-gray-800 mb-1">Les</h2>
-            <p class="text-gray-600 text-center text-sm">Správa výsadby a materiálu</p>
-          </div>
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Flower2, Wheat, TreePine } from 'lucide-vue-next'
+import { Flower2, Wheat } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -87,7 +67,4 @@ const navigateToFarma = () => {
   router.push('/farm')
 }
 
-const navigateToForest = () => {
-  router.push('/forest')
-}
 </script>

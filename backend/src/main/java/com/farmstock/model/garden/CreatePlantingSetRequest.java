@@ -1,4 +1,4 @@
-package com.farmstock.model.forest;
+package com.farmstock.model.garden;
 
 import lombok.Data;
 

@@ -99,7 +99,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
-import { forestApi } from '../services/api'
+import { gardenApi } from '../services/api'
 
 const router = useRouter()
 const submitting = ref(false)
@@ -116,7 +116,7 @@ const form = ref({
 const submitForm = async () => {
   try {
     submitting.value = true
-    await forestApi.createItem({
+    await gardenApi.createItem({
       name: form.value.name,
       category: form.value.category,
       quantity: parseFloat(form.value.quantity),
@@ -124,9 +124,9 @@ const submitForm = async () => {
       minStock: parseFloat(form.value.minStock) || 0,
       notes: form.value.notes || null
     })
-    router.push('/forest/items')
+    router.push('/gardens/items')
   } catch (error) {
-    console.error('Failed to create forest item:', error)
+    console.error('Failed to create garden item:', error)
     alert('Nepodarilo sa vytvoriť materiál: ' + (error.response?.data?.message || error.message))
   } finally {
     submitting.value = false

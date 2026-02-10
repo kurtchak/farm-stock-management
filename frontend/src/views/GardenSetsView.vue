@@ -48,15 +48,15 @@
           <div class="bg-gray-50 rounded-lg p-3 mb-3">
             <p class="text-[11px] text-gray-400 uppercase tracking-wide mb-1">Komponenty</p>
             <div v-for="item in set.items" :key="item.id" class="flex justify-between text-sm py-0.5">
-              <span class="text-gray-600">{{ item.forestItem.name }}</span>
-              <span class="text-gray-800 font-medium">{{ item.quantity }} {{ item.forestItem.unit }}</span>
+              <span class="text-gray-600">{{ item.gardenItem.name }}</span>
+              <span class="text-gray-800 font-medium">{{ item.quantity }} {{ item.gardenItem.unit }}</span>
             </div>
             <p v-if="!set.items || set.items.length === 0" class="text-sm text-gray-400">Žiadne komponenty</p>
           </div>
 
           <div class="flex gap-2">
             <button
-              @click="router.push(`/forest/sets/${set.id}/edit`)"
+              @click="router.push(`/gardens/sets/${set.id}/edit`)"
               class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-medium text-sm active:bg-gray-200 flex items-center justify-center gap-1"
             >
               <Pencil class="w-3.5 h-3.5" />
@@ -77,7 +77,7 @@
         <Layers class="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <p class="text-gray-500">Žiadne zostavy</p>
         <button
-          @click="router.push('/forest/sets/new')"
+          @click="router.push('/gardens/sets/new')"
           class="mt-4 text-[#2d6a4f] font-medium"
         >
           Vytvoriť prvú zostavu
@@ -87,7 +87,7 @@
 
     <!-- FAB -->
     <button
-      @click="router.push('/forest/sets/new')"
+      @click="router.push('/gardens/sets/new')"
       class="fixed bottom-6 right-6 w-14 h-14 bg-[#2d6a4f] rounded-full shadow-lg flex items-center justify-center text-white active:bg-[#40916c] transition-colors z-40"
     >
       <Plus class="w-7 h-7" />
@@ -99,27 +99,27 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Pencil, Trash2, Layers, Plus } from 'lucide-vue-next'
-import { useForestStore } from '../stores/forest'
-import { forestApi } from '../services/api'
+import { useGardenStore } from '../stores/garden'
+import { gardenApi } from '../services/api'
 
 const router = useRouter()
-const forestStore = useForestStore()
+const gardenStore = useGardenStore()
 
-const loading = computed(() => forestStore.loading)
-const sets = computed(() => forestStore.sets)
+const loading = computed(() => gardenStore.loading)
+const sets = computed(() => gardenStore.sets)
 
 const handleDelete = async (id) => {
   if (!confirm('Naozaj chcete odstrániť túto zostavu?')) return
   try {
-    await forestApi.deleteSet(id)
-    await forestStore.fetchSets()
+    await gardenApi.deleteSet(id)
+    await gardenStore.fetchSets()
   } catch (error) {
     alert('Nepodarilo sa odstrániť zostavu')
   }
 }
 
 onMounted(async () => {
-  await forestStore.fetchSets()
+  await gardenStore.fetchSets()
 })
 
 const goBack = () => {

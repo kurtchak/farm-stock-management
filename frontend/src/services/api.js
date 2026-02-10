@@ -109,69 +109,69 @@ export const cropApi = {
   }
 }
 
-export const forestApi = {
+export const gardenApi = {
   // Items
   getAllItems(category) {
     const params = category ? { category } : {}
-    return apiClient.get('/api/forest/items', { params })
+    return apiClient.get('/api/garden/items', { params })
   },
 
   getItem(id) {
-    return apiClient.get(`/api/forest/items/${id}`)
+    return apiClient.get(`/api/garden/items/${id}`)
   },
 
   createItem(data) {
-    return apiClient.post('/api/forest/items', data)
+    return apiClient.post('/api/garden/items', data)
   },
 
   updateItem(id, data) {
-    return apiClient.put(`/api/forest/items/${id}`, data)
+    return apiClient.put(`/api/garden/items/${id}`, data)
   },
 
   deleteItem(id) {
-    return apiClient.delete(`/api/forest/items/${id}`)
+    return apiClient.delete(`/api/garden/items/${id}`)
   },
 
   adjustItem(id, data) {
-    return apiClient.post(`/api/forest/items/${id}/adjust`, data)
+    return apiClient.post(`/api/garden/items/${id}/adjust`, data)
   },
 
   // Planting Sets
   getAllSets() {
-    return apiClient.get('/api/forest/sets')
+    return apiClient.get('/api/garden/sets')
   },
 
   getActiveSets() {
-    return apiClient.get('/api/forest/sets/active')
+    return apiClient.get('/api/garden/sets/active')
   },
 
   getSet(id) {
-    return apiClient.get(`/api/forest/sets/${id}`)
+    return apiClient.get(`/api/garden/sets/${id}`)
   },
 
   createSet(data) {
-    return apiClient.post('/api/forest/sets', data)
+    return apiClient.post('/api/garden/sets', data)
   },
 
   updateSet(id, data) {
-    return apiClient.put(`/api/forest/sets/${id}`, data)
+    return apiClient.put(`/api/garden/sets/${id}`, data)
   },
 
   deleteSet(id) {
-    return apiClient.delete(`/api/forest/sets/${id}`)
+    return apiClient.delete(`/api/garden/sets/${id}`)
   },
 
   executeSet(id, count) {
-    return apiClient.post(`/api/forest/sets/${id}/execute`, { count })
+    return apiClient.post(`/api/garden/sets/${id}/execute`, { count })
   },
 
   // Movements & Statistics
   getMovements() {
-    return apiClient.get('/api/forest/movements')
+    return apiClient.get('/api/garden/movements')
   },
 
   getStatistics() {
-    return apiClient.get('/api/forest/statistics')
+    return apiClient.get('/api/garden/statistics')
   }
 }
 

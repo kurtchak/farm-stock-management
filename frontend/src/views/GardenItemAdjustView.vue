@@ -112,7 +112,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft, ArrowDownCircle, ArrowUpCircle } from 'lucide-vue-next'
-import { forestApi } from '../services/api'
+import { gardenApi } from '../services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -144,7 +144,7 @@ const categoryLabel = (cat) => {
 onMounted(async () => {
   try {
     const id = route.params.id
-    const response = await forestApi.getItem(id)
+    const response = await gardenApi.getItem(id)
     item.value = response.data
   } catch (e) {
     error.value = 'Nepodarilo sa načítať položku'
@@ -158,12 +158,12 @@ const submitAdjustment = async () => {
 
   try {
     loading.value = true
-    await forestApi.adjustItem(item.value.id, {
+    await gardenApi.adjustItem(item.value.id, {
       quantity: parseFloat(quantity.value),
       movementType: isIncoming.value ? 'IN' : 'OUT',
       reason: reason.value || (isIncoming.value ? 'Príjem' : 'Výdaj')
     })
-    router.push('/forest/items')
+    router.push('/gardens/items')
   } catch (e) {
     error.value = e.response?.data?.message || e.message
   } finally {
