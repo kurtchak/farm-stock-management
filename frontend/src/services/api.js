@@ -109,4 +109,70 @@ export const cropApi = {
   }
 }
 
+export const forestApi = {
+  // Items
+  getAllItems(category) {
+    const params = category ? { category } : {}
+    return apiClient.get('/api/forest/items', { params })
+  },
+
+  getItem(id) {
+    return apiClient.get(`/api/forest/items/${id}`)
+  },
+
+  createItem(data) {
+    return apiClient.post('/api/forest/items', data)
+  },
+
+  updateItem(id, data) {
+    return apiClient.put(`/api/forest/items/${id}`, data)
+  },
+
+  deleteItem(id) {
+    return apiClient.delete(`/api/forest/items/${id}`)
+  },
+
+  adjustItem(id, data) {
+    return apiClient.post(`/api/forest/items/${id}/adjust`, data)
+  },
+
+  // Planting Sets
+  getAllSets() {
+    return apiClient.get('/api/forest/sets')
+  },
+
+  getActiveSets() {
+    return apiClient.get('/api/forest/sets/active')
+  },
+
+  getSet(id) {
+    return apiClient.get(`/api/forest/sets/${id}`)
+  },
+
+  createSet(data) {
+    return apiClient.post('/api/forest/sets', data)
+  },
+
+  updateSet(id, data) {
+    return apiClient.put(`/api/forest/sets/${id}`, data)
+  },
+
+  deleteSet(id) {
+    return apiClient.delete(`/api/forest/sets/${id}`)
+  },
+
+  executeSet(id, count) {
+    return apiClient.post(`/api/forest/sets/${id}/execute`, { count })
+  },
+
+  // Movements & Statistics
+  getMovements() {
+    return apiClient.get('/api/forest/movements')
+  },
+
+  getStatistics() {
+    return apiClient.get('/api/forest/statistics')
+  }
+}
+
 export default apiClient

@@ -62,6 +62,46 @@ const routes = [
     path: '/history',
     name: 'history',
     component: () => import('../views/HistoryView.vue')
+  },
+  {
+    path: '/forest',
+    name: 'Forest',
+    component: () => import('../views/ForestView.vue')
+  },
+  {
+    path: '/forest/items',
+    name: 'ForestItems',
+    component: () => import('../views/ForestItemsView.vue')
+  },
+  {
+    path: '/forest/items/create',
+    name: 'ForestItemCreate',
+    component: () => import('../views/ForestItemCreateView.vue')
+  },
+  {
+    path: '/forest/items/:id/adjust',
+    name: 'ForestItemAdjust',
+    component: () => import('../views/ForestItemAdjustView.vue')
+  },
+  {
+    path: '/forest/sets',
+    name: 'ForestSets',
+    component: () => import('../views/ForestSetsView.vue')
+  },
+  {
+    path: '/forest/sets/new',
+    name: 'ForestSetCreate',
+    component: () => import('../views/ForestSetFormView.vue')
+  },
+  {
+    path: '/forest/sets/:id/edit',
+    name: 'ForestSetEdit',
+    component: () => import('../views/ForestSetFormView.vue')
+  },
+  {
+    path: '/forest/history',
+    name: 'ForestHistory',
+    component: () => import('../views/ForestHistoryView.vue')
   }
 ]
 

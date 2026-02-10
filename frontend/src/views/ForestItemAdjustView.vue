@@ -1,0 +1,175 @@
+<template>
+  <div class="min-h-screen bg-[#f5f7fa] flex flex-col">
+    <!-- Header -->
+    <div class="p-4 bg-white shadow-sm flex items-center">
+      <button class="mr-4" @click="goBack">
+        <ArrowLeft class="w-6 h-6" />
+      </button>
+      <div :class="['w-8 h-8 rounded-full flex items-center justify-center mr-2',
+                    isIncoming ? 'bg-teal-100 text-teal-600' : 'bg-rose-100 text-rose-600']">
+        <ArrowDownCircle v-if="isIncoming" class="w-5 h-5" />
+        <ArrowUpCircle v-else class="w-5 h-5" />
+      </div>
+      <h1 class="text-xl font-semibold">{{ isIncoming ? 'Príjem' : 'Výdaj' }} materiálu</h1>
+    </div>
+
+    <div class="flex-grow flex flex-col items-center p-4">
+      <div :class="[
+        'w-full max-w-md bg-white rounded-lg shadow-sm overflow-hidden',
+        isIncoming ? 'border-t-4 border-teal-500' : 'border-t-4 border-rose-500'
+      ]">
+        <div class="p-6">
+          <!-- Loading state -->
+          <div v-if="loading" class="text-center py-8">
+            <div class="animate-spin h-8 w-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Načítavam...</p>
+          </div>
+
+          <!-- Error state -->
+          <div v-else-if="error" class="text-center text-red-500 py-8">
+            {{ error }}
+          </div>
+
+          <!-- Item info and form -->
+          <div v-else-if="item">
+            <!-- Direction toggle -->
+            <div class="flex gap-2 mb-5">
+              <button
+                @click="isIncoming = true"
+                :class="['flex-1 py-2 rounded-lg font-medium text-sm transition-colors',
+                  isIncoming ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-600']"
+              >
+                Príjem
+              </button>
+              <button
+                @click="isIncoming = false"
+                :class="['flex-1 py-2 rounded-lg font-medium text-sm transition-colors',
+                  !isIncoming ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600']"
+              >
+                Výdaj
+              </button>
+            </div>
+
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h2 class="text-lg font-semibold text-gray-900">{{ item.name }}</h2>
+              <p class="text-gray-600">Kategória: {{ categoryLabel(item.category) }}</p>
+              <p class="text-gray-600">Aktuálne množstvo: {{ item.quantity }} {{ item.unit }}</p>
+            </div>
+
+            <form class="space-y-6" @submit.prevent="submitAdjustment">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  {{ isIncoming ? 'Množstvo na príjem' : 'Množstvo na výdaj' }}
+                </label>
+                <input
+                  v-model="quantity"
+                  type="number"
+                  :max="isIncoming ? undefined : item.quantity"
+                  min="1"
+                  step="1"
+                  required
+                  class="w-full p-2 border rounded-md"
+                />
+                <p v-if="!isIncoming" class="text-sm text-gray-500 mt-1">
+                  Maximálne množstvo: {{ item.quantity }} {{ item.unit }}
+                </p>
+                <p v-if="showQuantityError" class="text-sm text-red-600 font-medium mt-1">
+                  Nedostatočné množstvo na sklade. Dostupné: {{ item.quantity }} {{ item.unit }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Dôvod</label>
+                <textarea
+                  v-model="reason"
+                  :placeholder="isIncoming ? 'Napr. Nákup, Dodávka...' : 'Napr. Výsadba, Spotreba...'"
+                  class="w-full p-2 border rounded-md"
+                  rows="2"
+                ></textarea>
+              </div>
+
+              <button
+                :class="[
+                  'w-full text-white py-3 rounded-lg font-semibold',
+                  isIncoming
+                    ? 'bg-teal-500 active:bg-teal-600'
+                    : 'bg-rose-500 active:bg-rose-600'
+                ]"
+                :disabled="!isValidQuantity"
+                type="submit"
+              >
+                {{ isIncoming ? 'Naskladniť' : 'Vyskladniť' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ArrowLeft, ArrowDownCircle, ArrowUpCircle } from 'lucide-vue-next'
+import { forestApi } from '../services/api'
+
+const router = useRouter()
+const route = useRoute()
+const item = ref(null)
+const quantity = ref('')
+const reason = ref('')
+const loading = ref(true)
+const error = ref(null)
+const isIncoming = ref(true)
+
+const isValidQuantity = computed(() => {
+  const qty = parseFloat(quantity.value)
+  if (isIncoming.value) return qty > 0
+  return qty > 0 && qty <= item.value?.quantity
+})
+
+const showQuantityError = computed(() => {
+  if (isIncoming.value) return false
+  const qty = parseFloat(quantity.value)
+  if (isNaN(qty) || qty <= 0) return false
+  return qty > item.value?.quantity
+})
+
+const categoryLabel = (cat) => {
+  const labels = { TREE: 'Strom', STAKE: 'Kolík', PROTECTION: 'Ochrana', OTHER: 'Ostatné' }
+  return labels[cat] || cat
+}
+
+onMounted(async () => {
+  try {
+    const id = route.params.id
+    const response = await forestApi.getItem(id)
+    item.value = response.data
+  } catch (e) {
+    error.value = 'Nepodarilo sa načítať položku'
+  } finally {
+    loading.value = false
+  }
+})
+
+const submitAdjustment = async () => {
+  if (!isValidQuantity.value) return
+
+  try {
+    loading.value = true
+    await forestApi.adjustItem(item.value.id, {
+      quantity: parseFloat(quantity.value),
+      movementType: isIncoming.value ? 'IN' : 'OUT',
+      reason: reason.value || (isIncoming.value ? 'Príjem' : 'Výdaj')
+    })
+    router.push('/forest/items')
+  } catch (e) {
+    error.value = e.response?.data?.message || e.message
+  } finally {
+    loading.value = false
+  }
+}
+
+const goBack = () => router.back()
+</script>
