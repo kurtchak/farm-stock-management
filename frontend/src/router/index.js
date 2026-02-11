@@ -10,8 +10,7 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../views/HubView.vue')
+    redirect: '/farm'
   },
   {
     path: '/farm',

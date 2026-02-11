@@ -3,16 +3,13 @@
     <!-- Header -->
     <div class="bg-white shadow-sm px-4 py-3 sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
       <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <button
-            @click="navigateBack"
-            class="flex items-center text-gray-500 active:text-gray-700 transition-colors p-2 -ml-2"
-          >
-            <ArrowLeft class="w-5 h-5" />
+        <div class="flex bg-gray-100 rounded-lg p-0.5 gap-0.5">
+          <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold bg-white shadow-sm text-gray-800">
+            <Flower2 class="w-4 h-4 text-green-700" /> Záhrady
           </button>
-          <h1 class="text-xl font-bold text-gray-800 ml-1 flex items-center gap-2">
-            <Flower2 class="w-5 h-5 text-green-700" /> Záhrada
-          </h1>
+          <button @click="router.push('/farm')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-gray-400 active:text-gray-500 transition-colors">
+            <Wheat class="w-4 h-4" /> Farma
+          </button>
         </div>
         <button
           @click="handleLogout"
@@ -258,7 +255,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  ArrowLeft, Flower2, TreePine, LogOut,
+  Flower2, Wheat, TreePine, LogOut,
   Package, Layers, Plus
 } from 'lucide-vue-next'
 import { useGardenStore } from '../stores/garden'
@@ -309,10 +306,6 @@ const confirmExecute = async () => {
   } finally {
     executeModal.loading = false
   }
-}
-
-const navigateBack = () => {
-  router.push('/')
 }
 
 const handleLogout = async () => {
