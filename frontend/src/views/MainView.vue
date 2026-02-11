@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col">
+  <div class="min-h-[100dvh] bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex flex-col">
     <!-- Header -->
-    <div class="bg-white shadow-sm px-4 py-3">
+    <div class="bg-white shadow-sm px-4 py-3 sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <button
@@ -18,13 +18,13 @@
           <button
               v-if="settingsEnabled"
               @click="navigateToSettings"
-              class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 active:bg-gray-100 transition-colors"
+              class="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 active:bg-gray-100 transition-colors"
           >
             <Settings class="w-5 h-5" />
           </button>
           <button
               @click="handleLogout"
-              class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500 active:bg-red-100 transition-colors"
+              class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center text-red-500 active:bg-red-100 transition-colors"
               title="Odhlásiť sa"
           >
             <LogOut class="w-5 h-5" />
@@ -33,12 +33,60 @@
       </div>
     </div>
 
+    <!-- Pull-to-refresh indicator -->
+    <div
+      v-if="pullDistance > 0 || isRefreshing"
+      class="flex items-center justify-center transition-all duration-200"
+      :style="{ height: (isRefreshing ? 48 : pullDistance) + 'px' }"
+    >
+      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+    </div>
+
     <!-- Main content -->
-    <div class="flex-1 p-4 space-y-5 overflow-auto pb-8">
-      <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
+    <div ref="scrollEl" class="flex-1 p-4 space-y-5 overflow-auto pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <!-- Loading State - Skeleton -->
+      <template v-if="loading">
+        <!-- Quick actions skeleton -->
+        <div>
+          <div class="h-3 w-24 bg-gray-200 rounded animate-pulse mb-3"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div v-for="i in 2" :key="i" class="bg-white rounded-2xl p-5 flex flex-col items-center gap-3 shadow-sm">
+              <div class="w-14 h-14 rounded-xl bg-gray-200 animate-pulse"></div>
+              <div class="flex flex-col items-center gap-1">
+                <div class="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
+                <div class="h-2 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary actions skeleton -->
+        <div class="grid grid-cols-2 gap-3">
+          <div v-for="i in 2" :key="i" class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-gray-200 animate-pulse"></div>
+            <div class="flex-1">
+              <div class="h-3 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+              <div class="h-2 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Movement cards skeleton -->
+        <div>
+          <div class="h-3 w-28 bg-gray-200 rounded animate-pulse mb-3"></div>
+          <div class="space-y-2">
+            <div v-for="i in 4" :key="i" class="bg-white rounded-xl px-4 py-3 shadow-sm">
+              <div class="flex items-center justify-between">
+                <div class="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div class="h-3 w-12 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div class="mt-2">
+                <div class="h-2 w-20 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
 
       <!-- Content -->
       <template v-else>
@@ -175,10 +223,17 @@ import { useStockStore } from '../stores/stock'
 import { useAuthStore } from '../stores/auth'
 import { stockApi } from '../services/api'
 import { features } from '../config/features'
+import { usePullToRefresh } from '../composables/usePullToRefresh'
 
 const router = useRouter()
 const stockStore = useStockStore()
 const authStore = useAuthStore()
+
+const scrollEl = ref(null)
+const { pullDistance, isRefreshing } = usePullToRefresh(scrollEl, async () => {
+  await stockStore.fetchDashboardData()
+  await loadDeletedStocksCount()
+})
 
 // Computed properties from store
 const loading = computed(() => stockStore.loading)

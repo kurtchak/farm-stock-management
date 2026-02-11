@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] flex items-center justify-center p-6">
+  <div class="min-h-[100dvh] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] flex items-center justify-center p-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
     <div class="w-full max-w-md">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
@@ -7,7 +7,7 @@
         </h1>
         <button
           @click="handleLogout"
-          class="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center text-red-500 active:bg-red-50 transition-colors shadow-sm"
+          class="w-11 h-11 rounded-xl bg-white/80 flex items-center justify-center text-red-500 active:bg-red-50 transition-colors shadow-sm"
           title="Odhlasiť sa"
         >
           <LogOut class="w-5 h-5" />
